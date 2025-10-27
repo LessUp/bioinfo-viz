@@ -1,0 +1,22 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Node / tooling
+node_modules/
+*.log
+
+# Builds / caches
+.dist/
+dist/
+build/
+.tmp/
+.cache/
+
+# Misc
+*.bak
+*.swp

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>算术编码可视化</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>if (window.mermaid){ mermaid.initialize({ startOnLoad: false, theme: 'dark' }); }</script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gifshot@0.4.5/build/gifshot.min.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <h1>算术编码可视化</h1>
+
+    <section class="panel">
+      <div class="field">
+        <label for="inputText">输入文本</label>
+        <textarea id="inputText" rows="4" placeholder="在此输入要编码的文本"></textarea>
+      </div>
+      <div class="row">
+        <button id="useSample" class="btn">示例</button>
+        <select id="modelType">
+          <option value="static">静态模型（全局频率）</option>
+          <option value="adaptive">自适应模型（Laplace平滑）</option>
+        </select>
+        <button id="buildModel" class="btn primary">生成模型</button>
+      </div>
+      <div class="meta">
+        <div>字母种类: <span id="alphabetSize">0</span></div>
+        <div>长度: <span id="textLength">0</span></div>
+      </div>
+      <div class="tableWrap">
+        <table id="modelTable">
+          <thead>
+            <tr>
+              <th>符号</th>
+              <th>频次</th>
+              <th>概率</th>
+              <th>累计区间</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="row">
+        <button id="modeEncode" class="btn primary">编码</button>
+        <button id="modeDecode" class="btn">解码</button>
+      </div>
+      <div class="row">
+        <input id="decodeValue" type="text" placeholder="解码码值：支持二进制 0.xxxx 或十进制 0.xxxx" />
+        <input id="decodeLen" type="number" min="1" step="1" placeholder="解码步数（默认=文本长度）" />
+        <button id="fillFromEncode" class="btn">用编码结果填充</button>
+        <button id="buildDecode" class="btn">构建解码</button>
+      </div>
+      <div class="controls">
+        <button id="resetBtn" class="btn" disabled>重置</button>
+        <button id="stepBtn" class="btn" disabled>步进</button>
+        <button id="playBtn" class="btn" disabled>播放</button>
+        <label class="scrub">
+          步骤
+          <input id="scrubber" type="range" min="0" max="0" step="1" value="0">
+          <span id="scrubLabel">0/0</span>
+        </label>
+        <label class="speed">
+          速度
+          <input id="speed" type="range" min="0.25" max="3" step="0.25" value="1">
+          <span id="speedLabel">1.0x</span>
+        </label>
+        <label class="captionToggle">
+          <input id="showCaption" type="checkbox" checked>
+          显示字幕
+        </label>
+      </div>
+      <div class="status">
+        <div>步骤 <span id="stepIdx">0</span>/<span id="stepTotal">0</span></div>
+        <div>当前符号 <span id="currSymbol">-</span></div>
+        <div>low <span id="lowVal">0</span></div>
+        <div>high <span id="highVal">1</span></div>
+        <div>range <span id="rangeVal">1</span></div>
+        <div>估计比特 <span id="bitsVal">0</span></div>
+        <div>t <span id="tVal">-</span></div>
+        <div>已定比特 <span id="bitPrefix">-</span></div>
+      </div>
+      <div class="canvases">
+        <div class="canvasRow">
+          <div class="canvasLabel">全局区间 [0, 1]</div>
+          <canvas id="barGlobal" width="960" height="80"></canvas>
+        </div>
+        <div class="canvasRow">
+          <div class="canvasLabel">当前区间</div>
+          <canvas id="barZoom" width="960" height="80"></canvas>
+        </div>
+      </div>
+      <div id="caption" class="caption" aria-live="polite"></div>
+      <div class="final">
+        <div>最终码值 <span id="finalVal">-</span></div>
+        <div>二进制 <span id="finalBin">-</span></div>
+        <div>解码结果 <span id="decodedText">-</span></div>
+      </div>
+      <div class="row">
+        <button id="recBtn" class="btn">开始录制(WebM)</button>
+        <button id="snapBtn" class="btn">保存当前帧(PNG)</button>
+        <button id="exportAllBtn" class="btn">导出所有步骤(PNG)</button>
+        <button id="exportGifBtn" class="btn">导出GIF</button>
+        <button id="exportPptBtn" class="btn">导出PPT</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="row">
+        <strong>Mermaid 算法图</strong>
+        <select id="mermaidType">
+          <option value="encode">编码流程</option>
+          <option value="decode">解码流程</option>
+          <option value="model">概率建模</option>
+          <option value="export">导出流程</option>
+          <option value="encode_steps">编码步骤图</option>
+          <option value="decode_steps">解码步骤图</option>
+          <option value="pie">概率饼图</option>
+          <option value="state_bits">位流状态机</option>
+          <option value="state_decode">解码状态机</option>
+          <option value="mindmap">知识导图</option>
+          <option value="sequence">渲染时序图</option>
+        </select>
+        <button id="renderMermaid" class="btn primary">渲染</button>
+        <button id="copyMermaid" class="btn">复制Mermaid</button>
+        <label class="captionToggle">
+          <input id="mermaidAuto" type="checkbox" checked>
+          跟随步骤
+        </label>
+        <button id="saveMermaidPng" class="btn">保存Mermaid为PNG</button>
+      </div>
+      <div id="mermaidOut" class="mermaidOut"></div>
+    </section>
+
+    <div id="tooltip" class="tooltip" style="display:none"></div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

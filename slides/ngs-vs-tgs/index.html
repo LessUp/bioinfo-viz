@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NGS vs TGS｜二代与三代测序对比幻灯</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 selection:bg-emerald-400/40">
+  <!-- 顶部导航与进度条 -->
+  <header class="fixed inset-x-0 top-0 z-40 bg-slate-900/70 backdrop-blur border-b border-slate-800">
+    <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+        <div class="font-semibold tracking-wide">NGS vs TGS｜二代与三代测序</div>
+      </div>
+ 
+      <div class="flex items-center gap-6">
+        <div class="text-sm text-slate-400"><span id="pageIndex">1</span> / <span id="pageTotal">--</span></div>
+        <div id="progressContainer" class="w-56 h-1.5 bg-slate-800 rounded overflow-hidden cursor-pointer" title="点击跳转">
+          <div id="progressBar" class="h-full bg-emerald-400 transition-all" style="width:0%"></div>
+        </div>
+        <div class="hidden md:flex items-center gap-3">
+          <button id="btnHelp" class="text-slate-400 hover:text-slate-200 text-sm">帮助</button>
+          <button id="btnFull" class="text-slate-400 hover:text-slate-200 text-sm">全屏</button>
+          <button id="btnTheme" class="text-slate-400 hover:text-slate-200 text-sm">主题</button>
+          <div id="timerDisplay" class="text-sm tabular-nums text-slate-300">00:00</div>
+        </div>
+        <div class="hidden md:flex items-center gap-2 text-xs text-slate-400">
+          <span>←/→ 导航</span>
+          <span>· 空格/回车 揭示</span>
+          <span>· M 目录</span>
+          <span>· N 备注</span>
+          <span>· T 暂停/继续</span>
+          <span>· R 重置</span>
+          <span>· ?/H 帮助</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 幻灯内容区 -->
+  <main class="pt-20 pb-28">
+    <div class="mx-auto max-w-5xl px-4">
+      <div id="slides" class="relative space-y-0">
+
+        <!-- 1. 封面 -->
+        <section class="slide active" data-title="封面">
+          <div class="min-h-[68vh] grid place-items-center">
+            <div class="text-center">
+              <h1 class="text-3xl md:text-5xl font-bold mb-6">二代测序 vs 三代测序</h1>
+              <p class="text-lg md:text-2xl text-slate-300 mb-8">差异、选择与组合｜面向应用的思维路径</p>
+              <ul class="text-slate-300/90 space-y-2">
+                <li class="fragment">问题 → 假设 → 方法 → 结论</li>
+                <li class="fragment">原理 · 数据特征 · 误差 · 应用 · 成本/时间</li>
+                <li class="fragment">决策树与组合策略（Hybrid）</li>
+              </ul>
+            </div>
+          </div>
+          <aside class="notes hidden">
+            建议：开场提问“为什么还有三代？”引出本场结构。
+          </aside>
+        </section>
+
+        <!-- 2. 导入与问题 -->
+        <section class="slide" data-title="导入与问题">
+          <h2 class="slide-title">导入与问题</h2>
+          <div class="slide-body">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 class="mb-2 text-emerald-300">问题</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                  <li class="fragment">二代（NGS）已成熟，为什么还需要三代（TGS）？</li>
+                  <li class="fragment">哪些任务更适合长读长？哪些仍适合短读长？</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="mb-2 text-emerald-300">思维路径</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                  <li class="fragment">假设：读长与错误率的权衡导致优势互补</li>
+                  <li class="fragment">方法：从原理/数据/误差/应用/流程/成本系统对比</li>
+                  <li class="fragment">结论：按任务选型，必要时混合策略</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <aside class="notes hidden">强调“问题驱动”的学习结构。</aside>
+        </section>
+
+        <!-- 3. 代际概览 -->
+        <section class="slide" data-title="代际概览">
+          <h2 class="slide-title">代际概览</h2>
+          <div class="slide-body">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 class="mb-2 text-emerald-300">NGS（短读长）</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                  <li class="fragment">读长：100–300 bp</li>
+                  <li class="fragment">原理：边合成边测序（Illumina 等）</li>
+                  <li class="fragment">特点：通量高、单位数据成本低</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="mb-2 text-emerald-300">TGS（长读长）</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                  <li class="fragment">读长：N50 10–25 kb，超长可达 100 kb+</li>
+                  <li class="fragment">原理：PacBio SMRT、ONT 纳米孔</li>
+                  <li class="fragment">特点：结构变异/重复区/分相更有优势</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. 原理对比 -->
+        <section class="slide" data-title="原理对比">
+          <h2 class="slide-title">原理对比</h2>
+          <div class="slide-body">
+            <ul class="list-disc list-inside space-y-2 text-slate-300">
+              <li class="fragment">NGS：簇扩增、荧光成像、流动槽；PCR 偏好</li>
+              <li class="fragment">PacBio：单分子实时（SMRT），CCS 形成 HiFi 高准确度读段</li>
+              <li class="fragment">ONT：DNA 通过纳米孔引起电流变化，可直接检测甲基化</li>
+            </ul>
+          </div>
+          <aside class="notes hidden">补充：NGS 更依赖 PCR；TGS 减少扩增偏倚。</aside>
+        </section>
+
+        <!-- 5. 数据特征 -->
+        <section class="slide" data-title="数据特征">
+          <h2 class="slide-title">数据特征</h2>
+          <div class="slide-body">
+            <ul class="list-disc list-inside space-y-2 text-slate-300">
+              <li class="fragment">读长分布：NGS 短且均一；TGS 长且分布更广</li>
+              <li class="fragment">GC 偏差：NGS 更明显；TGS 随机性更高</li>
+              <li class="fragment">通量与成本：NGS 更高通量、单位数据成本更低</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 6. 误差与纠错 -->
+        <section class="slide" data-title="误差与纠错">
+          <h2 class="slide-title">误差与纠错</h2>
+          <div class="slide-body">
+            <ul class="list-disc list-inside space-y-2 text-slate-300">
+              <li class="fragment">NGS：低错误率（~0.1–1%），以替换为主</li>
+              <li class="fragment">TGS 原始读：历史上较高；PacBio HiFi ~Q30–Q40；ONT Q20+</li>
+              <li class="fragment">纠错：TGS 自身多次覆盖（CCS）或用 NGS 抛光（hybrid polish）</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 7. 应用场景 -->
+        <section class="slide" data-title="应用场景">
+          <h2 class="slide-title">应用场景</h2>
+          <div class="slide-body">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 class="mb-2 text-emerald-300">NGS 强项</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                  <li class="fragment">SNV/短 INDEL 高精度检测</li>
+                  <li class="fragment">大规模面板/外显子/全基因组检测</li>
+                  <li class="fragment">成本敏感、批量项目</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="mb-2 text-emerald-300">TGS 强项</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                  <li class="fragment">结构变异（SV）、重复区、复杂区域解析</li>
+                  <li class="fragment">单倍型分相、全长转录本</li>
+                  <li class="fragment">原位甲基化（ONT）/ 长片段组装</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. 样本与建库 -->
+        <section class="slide" data-title="样本与建库">
+          <h2 class="slide-title">样本与建库</h2>
+          <div class="slide-body">
+            <ul class="list-disc list-inside space-y-2 text-slate-300">
+              <li class="fragment">NGS：片段化、接头连接、PCR；输入量较低</li>
+              <li class="fragment">TGS：高分子量 DNA（HMW），温和提取与纯化</li>
+              <li class="fragment">尺寸选择（BluePippin/切胶）以优化读长分布</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 9. 分析流程对比 -->
+        <section class="slide" data-title="分析流程对比">
+          <h2 class="slide-title">分析流程对比</h2>
+          <div class="slide-body">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 class="mb-2 text-emerald-300">NGS</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                  <li class="fragment">比对：BWA/Bowtie2</li>
+                  <li class="fragment">变异：GATK/DeepVariant</li>
+                  <li class="fragment">质控：FastQC/MultiQC</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="mb-2 text-emerald-300">TGS</h3>
+                <ul class="list-disc list-inside space-y-2 text-slate-300">
+                  <li class="fragment">比对：minimap2</li>
+                  <li class="fragment">变异：DeepVariant-HiFi/Clair3；SV：Sniffles</li>
+                  <li class="fragment">组装：hifiasm/HiCanu/Flye → 抛光：racon/medaka/pilon</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 10. 成本与时间 -->
+        <section class="slide" data-title="成本与时间">
+          <h2 class="slide-title">成本与时间</h2>
+          <div class="slide-body">
+            <ul class="list-disc list-inside space-y-2 text-slate-300">
+              <li class="fragment">单位数据成本：NGS 通常更低（但差距在缩小）</li>
+              <li class="fragment">周转：NGS 适合批量；TGS 实时流式、快速决策有优势</li>
+              <li class="fragment">总成本需结合目标覆盖度、重复度与精度要求</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 11. 决策策略（决策树） -->
+        <section class="slide" data-title="决策策略">
+          <h2 class="slide-title">决策策略（决策树）</h2>
+          <div class="slide-body">
+            <ul class="list-disc list-inside space-y-2 text-slate-300">
+              <li class="fragment">目标变异：SNV/短 INDEL → 倾向 NGS；SV/重复区 → 倾向 TGS</li>
+              <li class="fragment">基因组大小/重复度高 → TGS 或混合</li>
+              <li class="fragment">预算与时效：成本敏感 → NGS；快速决策 → TGS</li>
+              <li class="fragment">输出建议：仅 NGS / 仅 TGS / NGS+TGS（hybrid）</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 12. 组合策略与案例 -->
+        <section class="slide" data-title="组合策略与案例">
+          <h2 class="slide-title">组合策略与案例</h2>
+          <div class="slide-body">
+            <ul class="list-disc list-inside space-y-2 text-slate-300">
+              <li class="fragment">Hybrid assembly：TGS 搭框架，NGS 抛光细节</li>
+              <li class="fragment">SV + 精准 SNV：TGS 定位结构变异，NGS 精细验证</li>
+              <li class="fragment">应用示例：重复富集基因簇、易位/倒位、药代基因单倍型</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- 13. 总结与 Takeaways -->
+        <section class="slide" data-title="总结与 Takeaways">
+          <h2 class="slide-title">总结与 Takeaways</h2>
+          <div class="slide-body">
+            <ul class="list-disc list-inside space-y-2 text-slate-300">
+              <li class="fragment">没有“更好”的平台，只有“更匹配”的方案</li>
+              <li class="fragment">明确任务 → 选择合适读长与误差模型 → 必要时组合</li>
+              <li class="fragment">以应用为中心，动态评估成本、时间与精度</li>
+            </ul>
+          </div>
+          <aside class="notes hidden">可回扣开场假设，形成闭环。</aside>
+        </section>
+
+        <!-- 14. 操作提示 -->
+        <section class="slide" data-title="操作提示">
+          <h2 class="slide-title">操作提示</h2>
+          <div class="slide-body">
+            <div class="grid md:grid-cols-2 gap-6 text-slate-300">
+              <div>
+                <h3 class="mb-2 text-emerald-300">导航</h3>
+                <ul class="list-disc list-inside space-y-2">
+                  <li class="fragment">←/→ 上一页/下一页</li>
+                  <li class="fragment">空格 或 回车：逐条揭示</li>
+                  <li class="fragment">M：打开目录，点击跳转</li>
+                  <li class="fragment">N：切换讲者备注</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="mb-2 text-emerald-300">建议用法</h3>
+                <ul class="list-disc list-inside space-y-2">
+                  <li class="fragment">投影或屏幕共享演示</li>
+                  <li class="fragment">移动端也可浏览（响应式）</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- 底部按钮 -->
+  <div class="fixed bottom-6 right-6 z-40 flex gap-3">
+    <button id="btnLaser" class="btn-secondary">激光</button>
+    <button id="btnDraw" class="btn-secondary">批注</button>
+    <button id="btnHelp2" class="btn-secondary">帮助</button>
+    <button id="btnToc" class="btn-secondary">目录</button>
+    <button id="btnPrev" class="btn-secondary">上一页</button>
+    <button id="btnNext" class="btn-primary">下一页</button>
+  </div>
+
+  <!-- 批注画布与激光笔 -->
+  <canvas id="inkCanvas"></canvas>
+  <div id="laserDot"></div>
+
+  <!-- 目录 Overlay -->
+  <div id="tocOverlay" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative mx-auto mt-20 w-[92%] max-w-3xl bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-800">
+        <h3 class="font-semibold">目录</h3>
+        <button id="btnCloseToc" class="text-slate-400 hover:text-slate-200">关闭</button>
+      </div>
+      <ol id="tocList" class="max-h-[60vh] overflow-auto divide-y divide-slate-800"></ol>
+    </div>
+  </div>
+
+  <!-- 帮助 Overlay -->
+  <div id="helpOverlay" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative mx-auto mt-20 w-[92%] max-w-3xl bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-800">
+        <h3 class="font-semibold">帮助 · 快捷键与手势</h3>
+        <button id="btnCloseHelp" class="text-slate-400 hover:text-slate-200">关闭</button>
+      </div>
+      <div class="p-5 text-slate-300">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="mb-2 text-emerald-300">快捷键</h4>
+            <ul class="list-disc list-inside space-y-1">
+              <li>←/→：上一页/下一页</li>
+              <li>空格 / 回车：逐条揭示</li>
+              <li>M：目录开关</li>
+              <li>N：备注全局开关</li>
+              <li>T：计时器 暂停/继续</li>
+              <li>R：计时器 重置</li>
+              <li>? / H：打开帮助</li>
+              <li>Home / End：首/尾页</li>
+              <li>Esc：关闭弹层</li>
+              <li>F：全屏切换</li>
+              <li>P：打印导出（含全部要点）</li>
+              <li>G：跳转到指定页</li>
+              <li>C：复制当前页链接</li>
+              <li>S / Shift+S：显示/重置本页要点</li>
+              <li>V：演讲者视图</li>
+              <li>L：主题切换</li>
+              <li>A / Shift+A：自动播放开关 / 设置间隔</li>
+              <li>D：批注开关</li>
+              <li>X：清除批注</li>
+              <li>Z：激光笔开关</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="mb-2 text-emerald-300">触摸手势</h4>
+            <ul class="list-disc list-inside space-y-1">
+              <li>向左滑：下一页</li>
+              <li>向右滑：上一页</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 演讲者视图 Presenter Overlay -->
+  <div id="presenterOverlay" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative mx-auto mt-10 w-[96%] max-w-6xl bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-800">
+        <h3 class="font-semibold">演讲者视图</h3>
+        <div class="flex items-center gap-3">
+          <div id="timerDisplay2" class="text-sm tabular-nums text-slate-300">00:00</div>
+          <button id="btnTimerToggle" class="btn-secondary">暂停/继续</button>
+          <button id="btnTimerReset" class="btn-secondary">重置</button>
+          <button id="btnClosePresenter" class="text-slate-400 hover:text-slate-200">关闭</button>
+        </div>
+      </div>
+      <div class="p-5 text-slate-300 grid md:grid-cols-2 gap-6">
+        <div>
+          <h4 class="mb-2 text-emerald-300">当前页</h4>
+          <div id="presenterCurrent" class="bg-slate-950/50 border border-slate-800 rounded-lg p-4 max-h-[60vh] overflow-auto"></div>
+        </div>
+        <div class="space-y-6">
+          <div>
+            <h4 class="mb-2 text-emerald-300">下一页</h4>
+            <div id="presenterNext" class="bg-slate-950/50 border border-slate-800 rounded-lg p-4 max-h-[28vh] overflow-auto"></div>
+          </div>
+          <div>
+            <h4 class="mb-2 text-emerald-300">备注</h4>
+            <div id="presenterNotes" class="bg-slate-950/50 border border-slate-800 rounded-lg p-4 max-h-[28vh] overflow-auto text-slate-400"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>

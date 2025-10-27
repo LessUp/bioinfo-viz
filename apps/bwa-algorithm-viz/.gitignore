@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+bower_components/
+
+# Build outputs
+/dist/
+/build/
+/.cache/
+/.tmp/
+coverage/
+*.log
+*.tgz
+
+# IDEs & editors
+/.vscode/
+/.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Misc
+*.orig
+*.bak

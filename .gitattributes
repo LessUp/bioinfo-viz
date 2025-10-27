@@ -1,0 +1,19 @@
+* text=auto
+
+# Line endings
+*.sh eol=lf
+*.bash eol=lf
+*.py eol=lf
+*.ps1 eol=crlf
+*.cmd eol=crlf
+
+# Treat docs as documentation for linguist
+/docs/* linguist-documentation
+/slides/* linguist-documentation
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg text

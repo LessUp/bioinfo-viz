@@ -1,0 +1,25 @@
+name: Feature Request
+description: 提出一个功能建议或增强
+labels: [enhancement]
+body:
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 背景与动机
+      description: 该功能要解决的问题或带来的价值
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 方案草案
+      description: 期望的交互、UI、API、数据结构等
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 可选方案
+      description: 你考虑过的替代设计
+  - type: textarea
+    id: extra
+    attributes:
+      label: 其他信息

@@ -1,0 +1,14 @@
+* text=auto
+
+*.js text diff=javascript eol=lf
+*.css text diff=css eol=lf
+*.html text diff=html eol=lf
+*.json text eol=lf
+*.md text diff=markdown eol=lf
+
+# Treat images as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg text eol=lf

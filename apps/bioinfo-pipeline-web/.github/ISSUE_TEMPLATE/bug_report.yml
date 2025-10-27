@@ -1,0 +1,27 @@
+name: Bug Report
+description: 报告一个问题或缺陷
+labels: [bug]
+body:
+  - type: textarea
+    id: describe
+    attributes:
+      label: 描述
+      description: 清晰描述问题现象与影响
+      placeholder: 复现步骤、期望结果、实际结果
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本与环境
+      description: 浏览器/Node/OS 等
+      placeholder: e.g. Node 20, Chrome 128, Windows 11
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志与截图
+      description: 相关报错、截图或录屏链接
+  - type: textarea
+    id: extra
+    attributes:
+      label: 其他信息

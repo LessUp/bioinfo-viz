@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BWA / FM-Index 动画可视化</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">BWA / FM-Index 可视化</div>
+    <div class="sub">演示 BWT 构建、C/Occ 表与回溯搜索（Backward Search）</div>
+  </header>
+
+  <main class="container">
+    <section class="controls-panel">
+      <div class="panel-section">
+        <label class="field">
+          <span>参考序列（DNA）：</span>
+          <input id="refInput" type="text" value="GATTACA" spellcheck="false" />
+        </label>
+        <div class="hint">将自动追加终止符 <code>$</code>，请使用字母 <code>A/C/G/T</code>。</div>
+      </div>
+
+      <div class="panel-section">
+        <label class="field">
+          <span>读段（查询串）：</span>
+          <input id="readInput" type="text" value="TACA" spellcheck="false" />
+        </label>
+      </div>
+
+      <div class="panel-section row">
+        <button id="generateBtn" class="btn primary">生成步骤</button>
+        <button id="playBtn" class="btn">播放</button>
+        <button id="pauseBtn" class="btn">暂停</button>
+        <button id="stepBtn" class="btn">单步</button>
+        <button id="resetBtn" class="btn danger">重置</button>
+      </div>
+
+      <div class="panel-section">
+        <label for="speedRange" class="field">
+          <span>播放速度：</span>
+          <input id="speedRange" type="range" min="0.25" max="2" step="0.25" value="1" />
+          <span id="speedLabel">1×</span>
+        </label>
+      </div>
+
+      <div class="panel-section row">
+        <label class="checkbox">
+          <input id="toggleOcc" type="checkbox" checked /> 显示 Occ 表
+        </label>
+      </div>
+
+      <div class="panel-section">
+        <h3 style="margin:4px 0 8px; color: var(--muted); font-size: 14px;">高级参数</h3>
+        <label class="field">
+          <span>最小种子长度</span>
+          <input id="paramMinSeed" type="number" min="1" max="100" value="3" />
+        </label>
+        <label class="field">
+          <span>最大出现次数</span>
+          <input id="paramMaxOcc" type="number" min="1" max="1000" value="20" />
+        </label>
+        <label class="field">
+          <span>链式窗口</span>
+          <input id="paramChainWin" type="number" min="10" max="100000" value="1000" />
+        </label>
+        <label class="field">
+          <span>gap open</span>
+          <input id="paramGapOpen" type="number" min="1" max="20" value="4" />
+        </label>
+        <label class="field">
+          <span>gap extend</span>
+          <input id="paramGapExtend" type="number" min="0" max="10" value="1" />
+        </label>
+        <label class="field">
+          <span>SW 带宽 w</span>
+          <input id="paramSWBand" type="number" min="1" max="64" value="8" />
+        </label>
+        <label class="field">
+          <span>Z-drop</span>
+          <input id="paramZDrop" type="number" min="1" max="200" value="20" />
+        </label>
+        <label class="field">
+          <span>对角松弛(Chaining)</span>
+          <input id="paramDiagSlack" type="number" min="0" max="2000" value="50" />
+        </label>
+        <label class="field">
+          <span>重叠惩罚</span>
+          <input id="paramOverlapPenalty" type="number" min="0" max="50" value="10" />
+        </label>
+        <div class="row" style="margin-top:6px;">
+          <label class="checkbox"><input id="paramEnableRC" type="checkbox" /> 反向互补(RC)</label>
+          <label class="checkbox"><input id="paramEnableReseed" type="checkbox" /> 再播种</label>
+        </div>
+        <div class="row" style="margin-top:8px;">
+          <button id="applyParamsBtn" class="btn">应用参数</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="step-counter">步骤：<span id="stepCounter">0 / 0</span></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="log" id="logPanel"></div>
+      </div>
+    </section>
+
+    <section class="viz-panel">
+      <div class="viz-section">
+        <h3>参考序列</h3>
+        <div id="refSeq" class="strip"></div>
+      </div>
+
+      <div class="viz-section">
+        <h3>后缀数组（SA）与旋转</h3>
+        <div id="saTable" class="table"></div>
+      </div>
+
+      <div class="viz-section">
+        <h3>BWT 列（F / L）</h3>
+        <div id="bwtPanel" class="bwt"></div>
+      </div>
+
+      <div class="viz-section">
+        <h3>C 数组（每个字符在 F 中的首位置）</h3>
+        <div id="cTable" class="table"></div>
+      </div>
+
+      <div class="viz-section" id="occSection">
+        <h3>Occ 前缀计数表</h3>
+        <div id="occTable" class="table"></div>
+      </div>
+
+      <div class="viz-section">
+        <h3>回溯搜索进度（Backward Search）</h3>
+        <div id="searchPanel" class="search"></div>
+      </div>
+
+      <div class="viz-section">
+        <h3>匹配位置（在参考序列中高亮）</h3>
+        <div id="matchPanel" class="strip"></div>
+      </div>
+    </section>
+
+    <section class="viz-panel">
+      <div class="tabs">
+        <button class="tab active" data-tab="smem">SMEM</button>
+        <button class="tab" data-tab="chain">Chaining</button>
+        <button class="tab" data-tab="sw">SW+Z-drop</button>
+        <button class="tab" data-tab="mapq">MAPQ</button>
+        <button class="tab" data-tab="docs">Mermaid图</button>
+      </div>
+
+      <div id="tab-smem" class="tab-panel">
+        <div class="viz-section">
+          <h3>SMEM 种子可视化</h3>
+          <div id="smemStrip" class="strip"></div>
+          <div id="smemList" class="table"></div>
+          <div class="hint">注：带彩边为 SMEM；启用“反向互补(RC)”后将合并显示映射回正向坐标的 RC 种子。</div>
+        </div>
+      </div>
+
+      <div id="tab-chain" class="tab-panel" hidden>
+        <div class="viz-section">
+          <h3>种子链式拼接</h3>
+          <div class="row">
+            <button id="exportChainBtn" class="btn">导出链图 PNG</button>
+          </div>
+          <canvas id="chainCanvas" width="800" height="360"></canvas>
+          <div id="chainInfo" class="log"></div>
+          <div id="chainTooltip" class="tooltip" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div id="tab-sw" class="tab-panel" hidden>
+        <div class="viz-section">
+          <h3>带状 SW 与 Z-drop 示意</h3>
+          <div class="row">
+            <button id="exportSWBtn" class="btn">导出 SW 图 PNG</button>
+          </div>
+          <canvas id="swCanvas" width="800" height="360"></canvas>
+          <div id="swText" class="log"></div>
+        </div>
+      </div>
+
+      <div id="tab-mapq" class="tab-panel" hidden>
+        <div class="viz-section">
+          <h3>MAPQ 估计示意</h3>
+          <div class="row" style="gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+            <label class="field" style="min-width:220px;">
+              <span>分差权重</span>
+              <input id="mapqWDelta" type="range" min="1" max="10" value="4" />
+            </label>
+            <label class="field" style="min-width:220px;">
+              <span>重复惩罚权重</span>
+              <input id="mapqWDup" type="range" min="0" max="10" value="1" />
+            </label>
+            <label class="field" style="min-width:220px;">
+              <span>配对一致性权重</span>
+              <input id="mapqWPair" type="range" min="0" max="10" value="2" />
+            </label>
+          </div>
+          <canvas id="mapqCanvas" width="800" height="240"></canvas>
+          <div id="mapqResult" class="log"></div>
+        </div>
+      </div>
+
+      <div id="tab-docs" class="tab-panel" hidden>
+        <div class="viz-section">
+          <h3>算法流程图</h3>
+          <pre class="mermaid">
+flowchart LR
+  A[参考基因组] --> B[建索引: SA/BWT/FM-index]
+  R[读段 FASTQ] --> C[寻找 MEM/种子]
+  B --> C
+  C --> D[链式拼接 Chaining]
+  D --> E[带状 Smith-Waterman 延伸]
+  E --> F[打分与过滤]
+  F --> G[输出 SAM/BAM + MAPQ]
+          </pre>
+          <pre class="mermaid">
+flowchart TD
+  T[文本 T + $] --> R[生成所有旋转]
+  R --> S[按字典序排序旋转]
+  S --> SA[后缀数组 SA]
+  S --> L[L 列: 每个旋转的前一字符]
+  T --> F[F 列: 对 T 的字符排序]
+  L --> C[C 数组]
+  L --> Occ[Occ 前缀计数]
+  C --> FM[FM-index]
+  Occ --> FM
+          </pre>
+          <pre class="mermaid">
+flowchart TD
+  Start[初始化: l=0, r=n] --> For{从右到左遍历 P[i]}
+  For -->|字符 c| Update[l' = C[c] + Occ(c, l)\nr' = C[c] + Occ(c, r)]
+  Update --> Check{l' < r'?}
+  Check -->|是| Assign[l=l', r=r']
+  Assign --> For
+  Check -->|否| Empty[匹配失败]
+  For -->|完成| Range[候选区间 [l, r)]
+          </pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div>说明：该可视化使用简化的 FM-index 流程演示 BWA 的核心思想，适用于教学与交互理解。</div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="./app.js"></script>
+</body>
+</html>
