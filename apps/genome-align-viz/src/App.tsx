@@ -50,6 +50,18 @@ export default function App() {
     let totalAligned = 0
     let totalMismatches = 0
     let stopFn: (() => void) | null = null
+
+    workerRef.current?.postMessage({ type: 'coverage.reset' })
+    setBinsMap(new Map())
+    setBinSize(50)
+    setAvgCoverage(0)
+    setReads([])
+    setVariants([])
+    setLogs([])
+    setProcessedReads(0)
+    setQps(0)
+    setMismatchRate(0)
+
     if (connection.connected) {
       stopFn = startStream({ sourceType: connection.sourceType, url: connection.url, jobId, region }, (e: StreamEvent) => {
       if (e.type === 'pipeline.step') {

@@ -8,11 +8,7 @@ export type CoveragePayload = {
 let binSize = 50
 const coverage = new Map<number, number>()
 
-function handleUpdate(p: CoveragePayload) {
-  binSize = p.binSize
-  for (const b of p.bins) {
-    coverage.set(b.start, (coverage.get(b.start) ?? 0) + b.cov)
-  }
+function postAggregate() {
   const values = Array.from(coverage.values())
   const sum = values.reduce((a, b) => a + b, 0)
   const avg = values.length ? sum / values.length : 0
@@ -20,10 +16,26 @@ function handleUpdate(p: CoveragePayload) {
   ;(postMessage as any)({ type: 'coverage.agg', binSize, pairs, avg })
 }
 
+function handleUpdate(p: CoveragePayload) {
+  binSize = p.binSize
+  for (const b of p.bins) {
+    coverage.set(b.start, (coverage.get(b.start) ?? 0) + b.cov)
+  }
+  postAggregate()
+}
+
+function handleReset() {
+  coverage.clear()
+  binSize = 50
+  postAggregate()
+}
+
 self.onmessage = (ev: MessageEvent) => {
   const data = ev.data as any
   if (data?.type === 'coverage.update') {
     handleUpdate(data.payload as CoveragePayload)
+  } else if (data?.type === 'coverage.reset') {
+    handleReset()
   }
 }
 
