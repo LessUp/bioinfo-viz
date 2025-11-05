@@ -19,8 +19,20 @@ export default function EChart({ option, className, style }: EChartProps) {
     chartRef.current = instance;
     const resize = () => instance.resize();
     window.addEventListener("resize", resize);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        instance.resize();
+      });
+      resizeObserver.observe(ref.current);
+    }
+
     return () => {
       window.removeEventListener("resize", resize);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       instance.dispose();
       chartRef.current = null;
     };
