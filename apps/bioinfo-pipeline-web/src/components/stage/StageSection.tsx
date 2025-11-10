@@ -14,6 +14,15 @@ function metricValue(stage: Stage, key: string) {
   return stage.metrics.find((m) => m.key === key)?.value;
 }
 
+const stageGuides: Record<string, string> = {
+  quant: '关注表达矩阵的基因覆盖数与转录本检测情况，可结合富集模块进一步探索生物学意义。',
+  deg: '观察差异基因数量与统计阈值，适时导出结果用于下游可视化或报告撰写。',
+  pathway: '结合富集气泡图或外部工具，梳理与表型相关的通路，准备课堂讨论要点。',
+  cluster: '对比不同聚类参数的影响，记录聚类数量与代表性 marker 基因。',
+  'dim_reduce': '调节降维参数，确保主要细胞群分离效果良好，便于后续注释。',
+  integration: '多批次整合阶段需记录批次效应消除前后的指标，为部署真实数据做准备。',
+};
+
 export default function StageSection({ pipeline, stage }: { pipeline: Pipeline; stage: Stage }) {
   return (
     <section id={`stage-${stage.id}`} className="scroll-mt-20 rounded-lg border bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
@@ -47,6 +56,12 @@ export default function StageSection({ pipeline, stage }: { pipeline: Pipeline; 
           <EnrichmentBubble seed={`enrich-${pipeline.id}`} />
         ) : null}
       </div>
+
+      {stageGuides[stage.id] ? (
+        <div className="mt-4 rounded-lg bg-blue-50/70 p-3 text-sm text-blue-700 dark:bg-blue-500/10 dark:text-blue-200">
+          教学提示：{stageGuides[stage.id]}
+        </div>
+      ) : null}
 
       {stage.artifacts.length > 0 ? (
         <div className="mt-4">

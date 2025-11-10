@@ -15,6 +15,24 @@ export interface Metric {
   tags?: string[];
 }
 
+export type ResourceKind = 'doc' | 'app' | 'external';
+
+export interface ResourceLink {
+  title: string;
+  description: string;
+  href: string;
+  kind: ResourceKind;
+}
+
+export interface PipelineProfile {
+  name: string;
+  summary: string;
+  category: 'germline' | 'transcriptomics' | 'single-cell' | 'metagenomics' | 'other';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  recommendedAudiences: string[];
+  keyConcepts: string[];
+}
+
 export interface Artifact {
   id: string;
   name: string;
@@ -49,4 +67,8 @@ export interface Pipeline {
   samples: Sample[];
   status: RunStatus;
   stages: Stage[];
+  profile: PipelineProfile;
+  summary: string;
+  highlights: string[];
+  resources: ResourceLink[];
 }
