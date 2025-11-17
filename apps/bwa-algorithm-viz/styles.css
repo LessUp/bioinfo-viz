@@ -89,6 +89,13 @@ body {
 .btn:hover { border-color: #2a3b66; transform: translateY(-1px); }
 .btn.primary { background: linear-gradient(180deg, #1a2e5a 0%, #17315f 100%); border-color: #2a3b66; }
 .btn.danger { background: linear-gradient(180deg, #5a1a2a 0%, #5f1731 100%); border-color: #663344; }
+ .btn:active { transform: scale(0.98); }
+ .btn.playing { box-shadow: 0 0 0 2px var(--accent) inset; border-color: var(--accent); }
+ .btn.paused { box-shadow: 0 0 0 2px var(--primary) inset; border-color: var(--primary); }
+ @keyframes highlightStep { 0% { background-color: rgba(106,161,255,0.15); } 50% { background-color: rgba(106,161,255,0.55); } 100% { background-color: rgba(106,161,255,0.15); } }
+ .search .table-row.active { animation: highlightStep .9s ease; }
+ @keyframes fadeBars { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+ .mapq-bars-enter { animation: fadeBars .6s ease; }
 
 #speedRange { width: 160px; }
 #speedLabel { display: inline-block; width: 32px; text-align: right; color: var(--muted); }

@@ -1,6 +1,6 @@
 import type { Metric, Pipeline, PipelineProfile, ResourceLink, RunStatus, Sample, Stage } from '@/types/pipeline';
 
-interface StageTemplate extends Omit<Stage, 'startedAt' | 'finishedAt' | 'durationSec'> {
+interface StageTemplate extends Omit<Stage, 'startedAt' | 'finishedAt'> {
   /** seconds ago */
   startedAgo?: number;
   /** seconds ago */

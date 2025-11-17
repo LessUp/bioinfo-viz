@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
   inset?: boolean;
   elevation?: 'none' | 'sm' | 'md';
 }
@@ -13,13 +13,14 @@ const elevationMap: Record<NonNullable<CardProps['elevation']>, string> = {
 };
 
 export default function Card({
-  as: Component = 'div',
+  as: asProp = 'div',
   inset = false,
   elevation = 'sm',
   className = '',
   children,
   ...rest
 }: CardProps) {
+  const Component: React.ElementType = asProp;
   return (
     <Component
       className={[

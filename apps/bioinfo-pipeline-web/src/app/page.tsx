@@ -55,6 +55,18 @@ const labTools = [
     tag: '算法原理',
   },
   {
+    name: 'SW/NW 序列比对演示',
+    description: '动态规划矩阵填充与回溯路径动画。',
+    href: '/apps/smith-waterman-viz',
+    tag: '算法原理',
+  },
+  {
+    name: 'de Bruijn 图演示',
+    description: 'k-mer 分解、图构建与 Euler 路动画。',
+    href: '/apps/debruijn-viz',
+    tag: '组装原理',
+  },
+  {
     name: 'GATK 运行监控',
     description: '查看实时日志、指标与异常告警示例。',
     href: '/apps/gatk-run-dashboard',
@@ -187,9 +199,9 @@ export default function Home() {
                   <h3 className="mt-3 text-lg font-semibold text-zinc-900 dark:text-zinc-100">{tool.name}</h3>
                   <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{tool.description}</p>
                 </div>
-                <Link className="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:underline dark:text-blue-300" href={tool.href}>
+                <a className="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:underline dark:text-blue-300" href={tool.href}>
                   立即体验 →
-                </Link>
+                </a>
               </Card>
             ))}
           </div>

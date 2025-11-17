@@ -108,6 +108,7 @@
     }
     ctx.fillStyle = '#fff'; ctx.font='14px sans-serif'; ctx.textAlign='left';
     ctx.fillText(`MAPQ ≈ ${state._mapqContrib?.mapq??0}`, 12, 18);
+    try{ els.mapqCanvas.classList.add('mapq-bars-enter'); setTimeout(()=> els.mapqCanvas.classList.remove('mapq-bars-enter'), 700); }catch(_){ }
   }
 
   function syncMapqWeights(){
@@ -510,8 +511,13 @@
     // draw best path
     const path = chains.pathIdx.map(i => chains.cands[i]);
     ctx.strokeStyle = '#6affc1'; ctx.lineWidth = 2*DPR;
+    const tNow = canvas._animTime || performance.now();
+    const dur = 1200;
+    const t0 = canvas._chainStartTime || tNow; if(!canvas._chainStartTime) canvas._chainStartTime = tNow;
+    const p = Math.min(1, (tNow - t0)/dur);
+    const nDraw = Math.max(1, Math.floor(path.length * p));
     ctx.beginPath();
-    for(let k=0;k<path.length;k++){
+    for(let k=0;k<nDraw;k++){
       const s = path[k];
       const cx = margin + (s.refStart + s.len/2) * sx;
       const cy = margin + (s.readStart + s.len/2) * sy;
@@ -522,8 +528,13 @@
     if(chains.secondPathIdx && chains.secondPathIdx.length){
       const path2 = chains.secondPathIdx.map(i => chains.cands[i]);
       ctx.strokeStyle = 'rgba(189,147,249,0.9)'; ctx.setLineDash([6*DPR, 4*DPR]); ctx.lineWidth = 2*DPR;
+      const tNow2 = canvas._animTime || performance.now();
+      const dur2 = 900;
+      const t02 = canvas._chainStartTime2 || tNow2; if(!canvas._chainStartTime2) canvas._chainStartTime2 = tNow2;
+      const p2 = Math.min(1, (tNow2 - t02)/dur2);
+      const nDraw2 = Math.max(1, Math.floor(path2.length * p2));
       ctx.beginPath();
-      for(let k=0;k<path2.length;k++){
+      for(let k=0;k<nDraw2;k++){
         const s = path2[k];
         const cx = margin + (s.refStart + s.len/2) * sx;
         const cy = margin + (s.readStart + s.len/2) * sy;
@@ -784,6 +795,11 @@
     renderOccTable(m, showOcc);
 
     renderSearchPanel(m, processed);
+    try{
+      const rows = els.searchPanel.querySelectorAll('.table .table-row');
+      const activeIdx = Math.max(0, Math.min(rows.length-1, processed-1));
+      rows.forEach((row, idx)=> row.classList.toggle('active', idx===activeIdx));
+    }catch(_){ }
 
     const showMatch = step >= seg.match.start;
     renderMatchPanel(m, showMatch);
@@ -794,6 +810,10 @@
   function stop(){
     state.playing = false;
     if(state.timer){ clearInterval(state.timer); state.timer = null; }
+    try{
+      if(els.playBtn) els.playBtn.classList.remove('playing');
+      if(els.pauseBtn) els.pauseBtn.classList.add('paused');
+    }catch(_){ }
   }
 
   function play(){
@@ -807,6 +827,10 @@
     };
     const interval = Math.max(200, BASE_INTERVAL / state.speed);
     state.timer = setInterval(tick, interval);
+    try{
+      if(els.playBtn) els.playBtn.classList.add('playing');
+      if(els.pauseBtn) els.pauseBtn.classList.remove('paused');
+    }catch(_){ }
   }
 
   function pause(){ stop(); }
@@ -822,6 +846,11 @@
     if(state.stepIndex < state.steps){
       state.stepIndex++;
       render(state.stepIndex);
+      try{
+        const rows = els.searchPanel.querySelectorAll('.table .table-row');
+        const activeIdx = Math.max(0, Math.min(rows.length-1, state.stepIndex - state.segments.search.start));
+        const row = rows[activeIdx]; if(row) pulse(row);
+      }catch(_){ }
     }
   }
 
@@ -1033,8 +1062,13 @@
     // draw path
     if(path.length){
       ctx.strokeStyle = '#f7768e'; ctx.lineWidth = Math.max(2, 2*DPR);
+      const tNow = canvas._animTime || performance.now();
+      const dur = 1000;
+      const t0 = canvas._swStartTime || tNow; if(!canvas._swStartTime) canvas._swStartTime = tNow;
+      const p = Math.min(1, (tNow - t0)/dur);
+      const nDraw = Math.max(1, Math.floor(path.length * p));
       ctx.beginPath();
-      for(let k=0;k<path.length;k++){
+      for(let k=0;k<nDraw;k++){
         const [i,j] = path[path.length-1-k];
         const cx = ox + (j-0.5)*cellSize; const cy = oy + (i-0.5)*cellSize;
         if(k===0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);

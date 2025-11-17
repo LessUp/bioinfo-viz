@@ -1,0 +1,20 @@
+:root { --bg: #0b0f17; --panel: #0f1522; --text: #e8edf4; --muted: #9fb2c8; --primary: #6aa1ff; --danger: #ff6a8b; --border: #1d2740; }
+* { box-sizing: border-box; }
+body { margin:0; background: linear-gradient(180deg,#0a0e16 0%, #0b1220 100%); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+.app-header, .app-footer { padding: 16px 20px; border-bottom: 1px solid var(--border); background: rgba(15,21,34,0.8); backdrop-filter: blur(6px); }
+.app-footer { border-top: 1px solid var(--border); border-bottom: none; }
+.brand { font-weight: 700; font-size: 18px; }
+.sub { color: var(--muted); margin-top: 4px; font-size: 13px; }
+.container { display: grid; grid-template-columns: 320px 1fr; gap: 16px; padding: 16px; }
+.controls-panel, .viz-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.controls-panel { position: sticky; top:0; height: calc(100vh - 80px); overflow:auto; }
+.panel-section { margin-bottom: 12px; }
+.field { display: grid; grid-template-columns: 120px 1fr; align-items: center; gap: 8px; }
+.field input { width: 100%; background: #0c1322; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--text); }
+.row { display:flex; gap:8px; flex-wrap:wrap; }
+.btn { background:#11192c; border:1px solid var(--border); color: var(--text); padding:8px 12px; border-radius:8px; cursor:pointer; transition: all .2s ease; }
+.btn:hover { border-color:#2a3b66; transform: translateY(-1px); }
+.btn.primary { background: linear-gradient(180deg, #1a2e5a 0%, #17315f 100%); border-color:#2a3b66; }
+.btn.danger { background: linear-gradient(180deg, #5a1a2a 0%, #5f1731 100%); border-color:#663344; }
+.log { min-height: 80px; max-height: 200px; overflow:auto; background: #0c1322; border: 1px solid var(--border); border-radius: 8px; padding: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; }
+#graphCanvas { width: 100%; max-width: 100%; background: #0c1322; border: 1px solid var(--border); border-radius: 8px; }
