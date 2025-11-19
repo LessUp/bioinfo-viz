@@ -70,14 +70,16 @@ export default function StageSection({ pipeline, stage }: { pipeline: Pipeline; 
             {stage.artifacts.map((a) => (
               <li key={a.id}>
                 <span className="font-medium">{a.name}</span>
-                {a.url ? (
+                {a.url && a.url !== '#' ? (
                   <>
                     {' '}
                     <a className="text-blue-600 hover:underline" href={a.url} target="_blank" rel="noreferrer">
                       查看
                     </a>
                   </>
-                ) : null}
+                ) : (
+                  <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">示例占位，暂无实际文件</span>
+                )}
               </li>
             ))}
           </ul>

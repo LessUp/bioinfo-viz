@@ -16,7 +16,7 @@ const knowledgeBase: ResourceLink[] = [
   {
     title: 'NGS vs TGS 幻灯片',
     description: '教学演示可直接打开的对比幻灯片。',
-    href: '/slides/ngs-vs-tgs/index.html',
+    href: '/slides/ngs-vs-tgs',
     kind: 'doc',
   },
   {

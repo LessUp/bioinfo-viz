@@ -20,7 +20,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 export default function PipelineClient({ id }: { id: string }) {
-  const { data, error, isLoading, mutate } = useSWR<Pipeline>(`/api/pipelines/${id}`, getApi);
+  const { data, error, isLoading, isValidating, mutate } = useSWR<Pipeline>(`/api/pipelines/${id}`, getApi);
 
   const handleSelect = useCallback((stageId: string) => {
     const el = document.getElementById(`stage-${stageId}`);
@@ -68,8 +68,9 @@ export default function PipelineClient({ id }: { id: string }) {
             <button
               className="rounded-full border border-zinc-300 px-4 py-1.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
               onClick={() => mutate()}
+              disabled={isLoading || isValidating}
             >
-              刷新状态
+              {isLoading || isValidating ? '刷新中…' : '刷新状态'}
             </button>
           </div>
         </div>

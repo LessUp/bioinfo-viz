@@ -41,7 +41,7 @@ const gatkResource: ResourceLink = {
 const slidesResource: ResourceLink = {
   title: 'NGS vs TGS 幻灯片',
   description: '课堂可直接引用的比较幻灯片。',
-  href: '/slides/ngs-vs-tgs/index.html',
+  href: '/slides/ngs-vs-tgs',
   kind: 'doc',
 };
 
