@@ -1,4 +1,8 @@
+"use client";
+
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { ArrowRight, BookOpen, FlaskConical, GraduationCap, LayoutDashboard, Sparkles } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import LearningPathPlanner from '@/components/learning/LearningPathPlanner';
@@ -6,6 +10,7 @@ import ResourceCard from '@/components/pipeline/ResourceCard';
 import { listPipelinePreviews } from '@/lib/pipeline-presets';
 import { ROUTES } from '@/lib/routes';
 import type { ResourceLink } from '@/types/pipeline';
+import { cn } from '@/lib/utils';
 
 const knowledgeBase: ResourceLink[] = [
   {
@@ -75,139 +80,200 @@ const labTools = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
+};
+
 export default function Home() {
   const pipelinePreviews = listPipelinePreviews();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-blue-50 dark:from-black dark:via-zinc-900 dark:to-black">
-      <main className="mx-auto flex max-w-6xl flex-col gap-16 px-6 py-16">
-        <section className="grid gap-8 lg:grid-cols-[1.8fr_1fr] lg:items-center">
+    <div className="min-h-screen bg-zinc-50/50 dark:bg-black">
+      <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-black [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#3b82f6_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#1e3a8a_100%)] opacity-50" />
+      
+      <motion.main 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="mx-auto flex max-w-6xl flex-col gap-20 px-6 py-20"
+      >
+        {/* Hero Section */}
+        <motion.section variants={itemVariants} className="grid gap-12 lg:grid-cols-[1.5fr_1fr] lg:items-center">
           <div>
-            <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-blue-600 dark:border-blue-500/40 dark:bg-blue-500/10 dark:text-blue-200">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300"
+            >
+              <Sparkles className="h-3 w-3" />
               BioInfo Visualizer Playbook
-            </span>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-4xl">
-              构建生物信息课程的互动演示与学习路径
+            </motion.div>
+            <h1 className="mt-6 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl lg:text-6xl">
+              构建生物信息课程的
+              <span className="block bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-cyan-400">
+                互动演示与学习路径
+              </span>
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-300">
-              统一的可视化平台覆盖 WES、RNA-Seq、单细胞等流程，配套知识库与交互式学习路径，帮助讲师和学习者快速定位所需模块，持续迭代教学内容。
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
+              统一的可视化平台覆盖 WES、RNA-Seq、单细胞等流程，配套知识库与交互式学习路径，帮助讲师和学习者快速定位所需模块。
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-4">
               <Link
-                className="rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700"
                 href={ROUTES.pipelines.wesGermline}
+                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-blue-600/30"
               >
-                进入外显子流程演示
+                进入外显子流程
+                <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                className="rounded-full border border-blue-500 px-5 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-500/20"
                 href={ROUTES.pipelines.bulkRnaSeq}
+                className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-6 py-3 text-sm font-semibold text-zinc-700 transition-all hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-blue-700 dark:hover:bg-blue-900/20"
               >
                 查看 RNA-Seq 模块
               </Link>
             </div>
           </div>
-          <Card elevation="md" className="relative overflow-hidden">
-            <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-gradient-to-br from-blue-500/10 to-blue-500/40 blur-3xl sm:block" aria-hidden />
-            <div className="relative">
-              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">开发路线图</h2>
-              <ul className="mt-3 space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
-                <li>• 扩展流程模块到 RNA-Seq、单细胞等场景</li>
-                <li>• 统一组件库与 Mock API，方便切换真实服务</li>
-                <li>• 集成 Docs & Slides，打造一站式教学体验</li>
+          
+          <Card elevation="md" className="relative overflow-hidden border-zinc-200/50 bg-white/50 dark:border-zinc-800/50 dark:bg-zinc-900/50">
+            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
+            <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-cyan-500/20 blur-3xl" />
+            
+            <div className="relative space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-blue-100 p-2 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                  <LayoutDashboard className="h-6 w-6" />
+                </div>
+                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">开发路线图</h2>
+              </div>
+              
+              <ul className="space-y-4">
+                {[
+                  '扩展流程模块到 RNA-Seq、单细胞等场景',
+                  '统一组件库与 Mock API，方便切换真实服务',
+                  '集成 Docs & Slides，打造一站式教学体验'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-zinc-600 dark:text-zinc-300">
+                    <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-500" />
+                    {item}
+                  </li>
+                ))}
               </ul>
-              <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">从技术到运营的迭代建议，已在当前示例中落地基础框架。</p>
+              <p className="border-t border-zinc-100 pt-4 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                从技术到运营的迭代建议，已在当前示例中落地基础框架。
+              </p>
             </div>
           </Card>
-        </section>
+        </motion.section>
 
-        <section>
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        {/* Pipeline Section */}
+        <motion.section variants={itemVariants} className="space-y-8">
+          <div className="flex items-end justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
             <div>
-              <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">可视化流程目录</h2>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">挑选不同流程演示，快速跳转到对应该用场景。</p>
+              <h2 className="flex items-center gap-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                <FlaskConical className="h-6 w-6 text-blue-500" />
+                可视化流程目录
+              </h2>
+              <p className="mt-2 text-zinc-600 dark:text-zinc-400">挑选不同流程演示，快速跳转到对应该用场景。</p>
             </div>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">统一 UI 组件 + Mock API 数据层</span>
           </div>
-          <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {pipelinePreviews.map((pipeline) => (
-              <Card key={pipeline.id} elevation="md" className="flex h-full flex-col justify-between">
+              <Card 
+                key={pipeline.id} 
+                interactive 
+                elevation="sm" 
+                className="flex h-full flex-col justify-between"
+              >
                 <div>
                   <div className="flex items-center gap-2">
                     <Badge tone="accent">{CATEGORY_LABEL[pipeline.category] ?? pipeline.category}</Badge>
                     <Badge tone="neutral">{DIFFICULTY_LABEL[pipeline.difficulty] ?? pipeline.difficulty}</Badge>
                   </div>
-                  <h3 className="mt-3 text-lg font-semibold text-zinc-900 dark:text-zinc-100">{pipeline.name}</h3>
-                  <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{pipeline.summary}</p>
-                  <ul className="mt-3 space-y-1 text-xs text-zinc-500 dark:text-zinc-400">
-                    {pipeline.highlights.map((item) => (
-                      <li key={item}>• {item}</li>
+                  <h3 className="mt-4 text-xl font-bold text-zinc-900 dark:text-zinc-100">{pipeline.name}</h3>
+                  <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">{pipeline.summary}</p>
+                  <div className="mt-4 space-y-2">
+                    {pipeline.highlights.slice(0, 3).map((item) => (
+                      <div key={item} className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                        <div className="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                        {item}
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
                 <Link
-                  className="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:underline dark:text-blue-300"
                   href={`/pipelines/${pipeline.id}`}
+                  className="group mt-6 flex items-center gap-1 text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400"
                 >
-                  查看详情 →
+                  查看详情 
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Card>
             ))}
           </div>
-        </section>
+        </motion.section>
 
-        <section>
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        {/* Learning Path Section */}
+        <motion.section variants={itemVariants} className="space-y-8">
+           <div className="flex items-end justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
             <div>
-              <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">交互式学习路径</h2>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">针对不同角色设计分级任务，可标记完成进度并跳转到相关模块。</p>
+              <h2 className="flex items-center gap-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                <GraduationCap className="h-6 w-6 text-emerald-500" />
+                交互式学习路径
+              </h2>
+              <p className="mt-2 text-zinc-600 dark:text-zinc-400">针对不同角色设计分级任务，可标记完成进度。</p>
             </div>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">支持自学/授课双场景</span>
           </div>
-          <div className="mt-6">
-            <LearningPathPlanner />
-          </div>
-        </section>
+          <LearningPathPlanner />
+        </motion.section>
 
-        <section>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">资料与讲义集成</h2>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">Docs 与 Slides 一站式访问，适配线上线下授课。</p>
+        {/* Bottom Grid: Resources & Tools */}
+        <div className="grid gap-12 lg:grid-cols-2">
+          {/* Resources */}
+          <motion.section variants={itemVariants} className="space-y-6">
+            <h2 className="flex items-center gap-2 text-xl font-bold text-zinc-900 dark:text-zinc-100">
+              <BookOpen className="h-5 w-5 text-amber-500" />
+              资料与讲义集成
+            </h2>
+            <div className="grid gap-4">
+              {knowledgeBase.map((resource) => (
+                <ResourceCard key={resource.title} resource={resource} />
+              ))}
             </div>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">持续补充课程素材</span>
-          </div>
-          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {knowledgeBase.map((resource) => (
-              <ResourceCard key={resource.title} resource={resource} />
-            ))}
-          </div>
-        </section>
+          </motion.section>
 
-        <section>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">关联实验工具</h2>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">与仓库内其他子应用联动，扩展教学互动性。</p>
+          {/* Lab Tools */}
+          <motion.section variants={itemVariants} className="space-y-6">
+            <h2 className="flex items-center gap-2 text-xl font-bold text-zinc-900 dark:text-zinc-100">
+              <FlaskConical className="h-5 w-5 text-purple-500" />
+              关联实验工具
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {labTools.map((tool) => (
+                <Link key={tool.name} href={tool.href} className="block h-full">
+                  <Card interactive elevation="sm" className="h-full">
+                    <Badge tone="neutral" className="mb-2">{tool.tag}</Badge>
+                    <h3 className="font-bold text-zinc-900 dark:text-zinc-100">{tool.name}</h3>
+                    <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{tool.description}</p>
+                  </Card>
+                </Link>
+              ))}
             </div>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">Vite/React & Next.js 共用组件</span>
-          </div>
-          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-            {labTools.map((tool) => (
-              <Card key={tool.name} elevation="md" className="flex h-full flex-col justify-between">
-                <div>
-                  <Badge tone="neutral">{tool.tag}</Badge>
-                  <h3 className="mt-3 text-lg font-semibold text-zinc-900 dark:text-zinc-100">{tool.name}</h3>
-                  <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{tool.description}</p>
-                </div>
-                <a className="mt-4 inline-flex items-center text-sm font-semibold text-blue-600 hover:underline dark:text-blue-300" href={tool.href}>
-                  立即体验 →
-                </a>
-              </Card>
-            ))}
-          </div>
-        </section>
-      </main>
+          </motion.section>
+        </div>
+      </motion.main>
     </div>
   );
 }

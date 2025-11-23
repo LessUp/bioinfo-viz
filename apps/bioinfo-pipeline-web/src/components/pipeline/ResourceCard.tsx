@@ -1,17 +1,18 @@
 import React from 'react';
+import { FileText, AppWindow, Globe, ExternalLink } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import type { ResourceLink } from '@/types/pipeline';
 
-function iconForKind(kind: ResourceLink['kind']) {
+function getIcon(kind: ResourceLink['kind']) {
   switch (kind) {
     case 'doc':
-      return '📄';
+      return <FileText className="h-6 w-6 text-blue-500" />;
     case 'app':
-      return '🧪';
+      return <AppWindow className="h-6 w-6 text-purple-500" />;
     case 'external':
     default:
-      return '🌐';
+      return <Globe className="h-6 w-6 text-zinc-500" />;
   }
 }
 
@@ -23,13 +24,13 @@ const badgeTone = {
 
 export default function ResourceCard({ resource }: { resource: ResourceLink }) {
   return (
-    <Card className="flex h-full flex-col" elevation="md">
-      <div className="flex items-start gap-3">
-        <span className="text-2xl" aria-hidden>
-          {iconForKind(resource.kind)}
-        </span>
+    <Card className="flex h-full flex-col" elevation="sm" interactive>
+      <div className="flex items-start gap-4">
+        <div className="flex-none rounded-lg bg-zinc-50 p-2 dark:bg-zinc-800">
+           {getIcon(resource.kind)}
+        </div>
         <div>
-          <div className="text-base font-semibold text-zinc-900 dark:text-zinc-100">{resource.title}</div>
+          <div className="text-base font-bold text-zinc-900 dark:text-zinc-100">{resource.title}</div>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{resource.description}</p>
         </div>
       </div>
@@ -38,12 +39,13 @@ export default function ResourceCard({ resource }: { resource: ResourceLink }) {
           {resource.kind === 'doc' ? '讲义' : resource.kind === 'app' ? '互动演示' : '外部资源'}
         </Badge>
         <a
-          className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-300"
+          className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline dark:text-blue-300"
           href={resource.href}
           target={resource.kind === 'external' ? '_blank' : undefined}
           rel={resource.kind === 'external' ? 'noreferrer' : undefined}
         >
           查看
+          {resource.kind === 'external' && <ExternalLink className="h-3 w-3" />}
         </a>
       </div>
     </Card>
