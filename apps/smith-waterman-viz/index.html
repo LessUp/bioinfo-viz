@@ -31,6 +31,12 @@
         <button id="stepBtn" class="btn">单步</button>
         <button id="resetBtn" class="btn danger">重置</button>
       </div>
+      <div class="panel-section row">
+        <label class="field"><span>播放速度</span>
+          <input id="speed" type="range" min="0.25" max="2" step="0.25" value="1" />
+        </label>
+        <div class="chip" id="speedLabel">1.00x</div>
+      </div>
       <div class="panel-section">
         <label class="field"><span>模式</span>
           <select id="mode">
@@ -49,6 +55,18 @@
       </div>
       <div class="panel-section">
         <div class="log" id="logPanel"></div>
+      </div>
+      <div class="panel-section">
+        <div class="card">
+          <div class="card-title">当前步骤解读</div>
+          <div class="log small" id="stepDetails">尚未开始，请点击“构建矩阵”。</div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="card">
+          <div class="card-title">教学引导</div>
+          <ul class="note-list" id="teachingNotes"></ul>
+        </div>
       </div>
     </section>
     <section class="viz-panel">
