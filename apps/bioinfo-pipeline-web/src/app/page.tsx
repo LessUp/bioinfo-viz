@@ -1,12 +1,14 @@
 "use client";
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, BookOpen, FlaskConical, GraduationCap, LayoutDashboard, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, FlaskConical, GraduationCap, LayoutDashboard, Sparkles, Dna, Activity, Microscope } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import LearningPathPlanner from '@/components/learning/LearningPathPlanner';
 import ResourceCard from '@/components/pipeline/ResourceCard';
+import Background from '@/components/layout/Background';
 import { listPipelinePreviews } from '@/lib/pipeline-presets';
 import { ROUTES } from '@/lib/routes';
 import type { ResourceLink } from '@/types/pipeline';
@@ -39,6 +41,12 @@ const CATEGORY_LABEL: Record<string, string> = {
   'single-cell': '单细胞',
   metagenomics: '宏基因组',
   other: '其他',
+};
+
+const CATEGORY_ICONS: Record<string, any> = {
+  germline: Dna,
+  transcriptomics: Activity,
+  'single-cell': Microscope,
 };
 
 const DIFFICULTY_LABEL: Record<string, string> = {
@@ -97,156 +105,203 @@ const itemVariants = {
 
 export default function Home() {
   const pipelinePreviews = listPipelinePreviews();
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  const categories = ['all', ...Array.from(new Set(pipelinePreviews.map(p => p.category)))];
+
+  const filteredPipelines = activeCategory === 'all' 
+    ? pipelinePreviews 
+    : pipelinePreviews.filter(p => p.category === activeCategory);
 
   return (
-    <div className="min-h-screen bg-zinc-50/50 dark:bg-black">
-      <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-black [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#3b82f6_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#1e3a8a_100%)] opacity-50" />
+    <div className="relative min-h-screen">
+      <Background />
       
-      <motion.main 
+      <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="mx-auto flex max-w-6xl flex-col gap-20 px-6 py-20"
+        className="mx-auto flex max-w-7xl flex-col gap-24 px-6 py-24 lg:px-8"
       >
         {/* Hero Section */}
-        <motion.section variants={itemVariants} className="grid gap-12 lg:grid-cols-[1.5fr_1fr] lg:items-center">
-          <div>
+        <motion.section variants={itemVariants} className="grid gap-16 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+          <div className="max-w-2xl">
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300"
+              className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-blue-700 backdrop-blur-sm dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300"
             >
               <Sparkles className="h-3 w-3" />
               BioInfo Visualizer Playbook
             </motion.div>
-            <h1 className="mt-6 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl lg:text-6xl">
-              构建生物信息课程的
-              <span className="block bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-cyan-400">
-                互动演示与学习路径
+            <h1 className="mt-8 text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-6xl lg:text-7xl">
+              探索生物信息的
+              <span className="mt-2 block bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-500 bg-clip-text text-transparent dark:from-blue-400 dark:via-cyan-400 dark:to-teal-400">
+                微观世界与宏大流程
               </span>
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
-              统一的可视化平台覆盖 WES、RNA-Seq、单细胞等流程，配套知识库与交互式学习路径，帮助讲师和学习者快速定位所需模块。
+            <p className="mt-8 text-lg leading-relaxed text-zinc-600 dark:text-zinc-300">
+              我们提供一站式的可视化教学与演示平台。从 BWA 比对算法的微观细节，到全基因组分析的宏大流程，通过交互式动画与实时仪表盘，让复杂的生物信息学变得触手可及。
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href={ROUTES.pipelines.wesGermline}
-                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-blue-600/30"
+                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-700 hover:shadow-blue-600/40 hover:-translate-y-1"
               >
-                进入外显子流程
+                开始探索流程
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link
-                href={ROUTES.pipelines.bulkRnaSeq}
-                className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-6 py-3 text-sm font-semibold text-zinc-700 transition-all hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-blue-700 dark:hover:bg-blue-900/20"
+              <a
+                href="#learning-paths"
+                className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/50 px-8 py-4 text-sm font-bold text-zinc-700 backdrop-blur-sm transition-all hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-300 dark:hover:border-blue-700 dark:hover:bg-blue-900/20"
               >
-                查看 RNA-Seq 模块
-              </Link>
+                定制学习路径
+              </a>
             </div>
           </div>
           
-          <Card elevation="md" className="relative overflow-hidden border-zinc-200/50 bg-white/50 dark:border-zinc-800/50 dark:bg-zinc-900/50">
-            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
-            <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-cyan-500/20 blur-3xl" />
-            
-            <div className="relative space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-blue-100 p-2 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                  <LayoutDashboard className="h-6 w-6" />
+          <div className="relative hidden lg:block">
+             <Card elevation="lg" className="relative z-10 overflow-hidden border-zinc-200/50 bg-white/80 p-8 backdrop-blur-xl dark:border-zinc-700/50 dark:bg-zinc-900/80">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 p-3 text-white shadow-lg">
+                    <LayoutDashboard className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">平台亮点</h2>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">Feature Highlights</p>
+                  </div>
                 </div>
-                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">开发路线图</h2>
-              </div>
-              
-              <ul className="space-y-4">
-                {[
-                  '扩展流程模块到 RNA-Seq、单细胞等场景',
-                  '统一组件库与 Mock API，方便切换真实服务',
-                  '集成 Docs & Slides，打造一站式教学体验'
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-zinc-600 dark:text-zinc-300">
-                    <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-500" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <p className="border-t border-zinc-100 pt-4 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-                从技术到运营的迭代建议，已在当前示例中落地基础框架。
-              </p>
-            </div>
-          </Card>
+                <ul className="space-y-6">
+                  {[
+                    { title: '全流程可视化', desc: '覆盖 WES、RNA-Seq、单细胞等主流分析流程', icon: FlaskConical, color: 'text-blue-500' },
+                    { title: '算法原理动画', desc: '深入浅出展示比对、组装等核心算法机制', icon: Dna, color: 'text-emerald-500' },
+                    { title: '交互式学习', desc: '循序渐进的任务系统，记录你的每一步成长', icon: GraduationCap, color: 'text-amber-500' }
+                  ].map((item, i) => (
+                    <li key={i} className="flex gap-4">
+                       <div className={cn("mt-1 flex h-8 w-8 flex-none items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800", item.color)}>
+                          <item.icon className="h-4 w-4" />
+                       </div>
+                       <div>
+                          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">{item.title}</h3>
+                          <p className="text-sm text-zinc-500 dark:text-zinc-400">{item.desc}</p>
+                       </div>
+                    </li>
+                  ))}
+                </ul>
+             </Card>
+             {/* Decor elements */}
+             <div className="absolute -right-10 -top-10 h-72 w-72 rounded-full bg-gradient-to-br from-blue-400/30 to-purple-400/30 blur-3xl" />
+             <div className="absolute -bottom-10 -left-10 h-72 w-72 rounded-full bg-gradient-to-br from-cyan-400/30 to-emerald-400/30 blur-3xl" />
+          </div>
         </motion.section>
 
-        {/* Pipeline Section */}
-        <motion.section variants={itemVariants} className="space-y-8">
-          <div className="flex items-end justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
-            <div>
-              <h2 className="flex items-center gap-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                <FlaskConical className="h-6 w-6 text-blue-500" />
-                可视化流程目录
+        {/* Pipeline Explorer */}
+        <motion.section variants={itemVariants} className="space-y-10">
+          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div className="max-w-2xl">
+              <h2 className="flex items-center gap-3 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <FlaskConical className="h-8 w-8 text-blue-500" />
+                可视化流程演示
               </h2>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">挑选不同流程演示，快速跳转到对应该用场景。</p>
+              <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
+                精选不同组学场景的经典流程，支持实时状态监控、关键指标查看与结果报告预览。
+              </p>
+            </div>
+            
+            <div className="flex gap-2 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={cn(
+                    "rounded-md px-4 py-2 text-sm font-medium transition-all",
+                    activeCategory === cat
+                      ? "bg-white text-blue-600 shadow-sm dark:bg-zinc-700 dark:text-blue-400"
+                      : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-600 dark:hover:text-zinc-200"
+                  )}
+                >
+                  {cat === 'all' ? '全部' : CATEGORY_LABEL[cat] ?? cat}
+                </button>
+              ))}
             </div>
           </div>
           
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {pipelinePreviews.map((pipeline) => (
-              <Card 
-                key={pipeline.id} 
-                interactive 
-                elevation="sm" 
-                className="flex h-full flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Badge tone="accent">{CATEGORY_LABEL[pipeline.category] ?? pipeline.category}</Badge>
-                    <Badge tone="neutral">{DIFFICULTY_LABEL[pipeline.difficulty] ?? pipeline.difficulty}</Badge>
-                  </div>
-                  <h3 className="mt-4 text-xl font-bold text-zinc-900 dark:text-zinc-100">{pipeline.name}</h3>
-                  <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">{pipeline.summary}</p>
-                  <div className="mt-4 space-y-2">
-                    {pipeline.highlights.slice(0, 3).map((item) => (
-                      <div key={item} className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-                        <div className="h-1 w-1 rounded-full bg-zinc-300 dark:bg-zinc-600" />
-                        {item}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <Link
-                  href={`/pipelines/${pipeline.id}`}
-                  className="group mt-6 flex items-center gap-1 text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400"
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {filteredPipelines.map((pipeline) => {
+              const CategoryIcon = CATEGORY_ICONS[pipeline.category] || Activity;
+              return (
+                <Card 
+                  key={pipeline.id} 
+                  interactive 
+                  elevation="md" 
+                  className="group flex h-full flex-col justify-between overflow-hidden border-zinc-200 bg-white/50 backdrop-blur-sm transition-all hover:border-blue-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900/50 dark:hover:border-blue-700"
                 >
-                  查看详情 
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Card>
-            ))}
+                  <div>
+                    <div className="flex items-start justify-between">
+                       <div className="rounded-lg bg-blue-50 p-2.5 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+                         <CategoryIcon className="h-6 w-6" />
+                       </div>
+                       <Badge tone="neutral" className="bg-zinc-100 dark:bg-zinc-800">{DIFFICULTY_LABEL[pipeline.difficulty] ?? pipeline.difficulty}</Badge>
+                    </div>
+                    
+                    <h3 className="mt-6 text-xl font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 transition-colors">
+                      {pipeline.name}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 line-clamp-3">
+                      {pipeline.summary}
+                    </p>
+                    
+                    <div className="mt-6 space-y-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+                      {pipeline.highlights.slice(0, 3).map((item) => (
+                        <div key={item} className="flex items-start gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                          <div className="mt-1.5 h-1 w-1 flex-none rounded-full bg-blue-400" />
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <Link
+                    href={`/pipelines/${pipeline.id}`}
+                    className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-50 px-4 py-2.5 text-sm font-semibold text-zinc-900 transition-colors hover:bg-blue-600 hover:text-white dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-blue-600"
+                  >
+                    进入演示
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Card>
+              );
+            })}
           </div>
         </motion.section>
 
         {/* Learning Path Section */}
-        <motion.section variants={itemVariants} className="space-y-8">
-           <div className="flex items-end justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
-            <div>
-              <h2 className="flex items-center gap-2 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                <GraduationCap className="h-6 w-6 text-emerald-500" />
+        <motion.section id="learning-paths" variants={itemVariants} className="space-y-10 rounded-3xl bg-white/50 p-8 shadow-sm ring-1 ring-zinc-200/50 backdrop-blur-md lg:p-12 dark:bg-zinc-900/30 dark:ring-zinc-800/50">
+           <div className="flex items-end justify-between border-b border-zinc-200 pb-6 dark:border-zinc-800">
+            <div className="max-w-2xl">
+              <h2 className="flex items-center gap-3 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+                <GraduationCap className="h-8 w-8 text-emerald-500" />
                 交互式学习路径
               </h2>
-              <p className="mt-2 text-zinc-600 dark:text-zinc-400">针对不同角色设计分级任务，可标记完成进度。</p>
+              <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
+                为你规划清晰的学习路线图，从基础概念到实战演练，步步为营。
+              </p>
             </div>
           </div>
           <LearningPathPlanner />
         </motion.section>
 
-        {/* Bottom Grid: Resources & Tools */}
+        {/* Resources & Tools */}
         <div className="grid gap-12 lg:grid-cols-2">
           {/* Resources */}
-          <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="flex items-center gap-2 text-xl font-bold text-zinc-900 dark:text-zinc-100">
-              <BookOpen className="h-5 w-5 text-amber-500" />
-              资料与讲义集成
-            </h2>
+          <motion.section variants={itemVariants} className="space-y-8">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-amber-100 p-2 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                知识库与讲义
+              </h2>
+            </div>
             <div className="grid gap-4">
               {knowledgeBase.map((resource) => (
                 <ResourceCard key={resource.title} resource={resource} />
@@ -255,25 +310,32 @@ export default function Home() {
           </motion.section>
 
           {/* Lab Tools */}
-          <motion.section variants={itemVariants} className="space-y-6">
-            <h2 className="flex items-center gap-2 text-xl font-bold text-zinc-900 dark:text-zinc-100">
-              <FlaskConical className="h-5 w-5 text-purple-500" />
-              关联实验工具
-            </h2>
+          <motion.section variants={itemVariants} className="space-y-8">
+             <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-purple-100 p-2 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                <Microscope className="h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                独立实验工具
+              </h2>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {labTools.map((tool) => (
-                <Link key={tool.name} href={tool.href} className="block h-full">
-                  <Card interactive elevation="sm" className="h-full">
-                    <Badge tone="neutral" className="mb-2">{tool.tag}</Badge>
+                <Link key={tool.name} href={tool.href} className="block h-full group">
+                  <Card interactive elevation="sm" className="h-full border-zinc-200 bg-white/60 transition-all hover:border-purple-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/60 dark:hover:border-purple-700">
+                    <div className="flex items-start justify-between mb-2">
+                      <Badge tone="neutral" className="group-hover:bg-purple-100 group-hover:text-purple-700 dark:group-hover:bg-purple-900/30 dark:group-hover:text-purple-300 transition-colors">{tool.tag}</Badge>
+                      <ArrowRight className="h-4 w-4 text-zinc-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </div>
                     <h3 className="font-bold text-zinc-900 dark:text-zinc-100">{tool.name}</h3>
-                    <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{tool.description}</p>
+                    <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{tool.description}</p>
                   </Card>
                 </Link>
               ))}
             </div>
           </motion.section>
         </div>
-      </motion.main>
+      </motion.div>
     </div>
   );
 }

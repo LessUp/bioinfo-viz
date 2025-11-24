@@ -7,14 +7,17 @@ import { cn } from '@/lib/utils';
 export interface CardProps extends HTMLMotionProps<'div'> {
   as?: any;
   inset?: boolean;
-  elevation?: 'none' | 'sm' | 'md';
+  elevation?: 'none' | 'sm' | 'md' | 'lg';
   interactive?: boolean;
+  children?: React.ReactNode;
+  className?: string;
 }
 
 const elevationMap = {
   none: 'shadow-none',
   sm: 'shadow-sm',
   md: 'shadow-lg shadow-black/5 dark:shadow-black/40',
+  lg: 'shadow-2xl shadow-blue-500/10 dark:shadow-black/50',
 };
 
 export default function Card({

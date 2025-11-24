@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, RotateCcw, Trophy, ArrowRight, BookOpen, ExternalLink } from 'lucide-react';
 import Card from '@/components/ui/Card';
@@ -11,12 +11,32 @@ import { cn } from '@/lib/utils';
 export default function LearningPathPlanner() {
   const [selectedPathId, setSelectedPathId] = useState(learningPaths[0]?.id ?? 'beginner');
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({});
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const saved = localStorage.getItem('bioinfo-learning-progress');
+    if (saved) {
+      try {
+        setCompletedSteps(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse learning progress', e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('bioinfo-learning-progress', JSON.stringify(completedSteps));
+    }
+  }, [completedSteps, mounted]);
 
   const selectedPath = useMemo(
     () => learningPaths.find((path) => path.id === selectedPathId) ?? learningPaths[0],
     [selectedPathId],
   );
 
+  if (!mounted) return <div className="h-96 w-full animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-900" />;
   if (!selectedPath) return null;
 
   const steps = selectedPath.steps;
