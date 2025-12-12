@@ -33,6 +33,16 @@ export interface PipelineProfile {
   keyConcepts: string[]
 }
 
+export interface PipelinePreview {
+  id: string
+  name: string
+  summary: string
+  highlights: string[]
+  difficulty: PipelineProfile['difficulty']
+  category: PipelineProfile['category']
+  keyConcepts: string[]
+}
+
 export interface Artifact {
   id: string
   name: string

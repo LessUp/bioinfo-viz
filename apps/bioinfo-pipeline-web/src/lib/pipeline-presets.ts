@@ -1,6 +1,7 @@
 import type {
   Metric,
   Pipeline,
+  PipelinePreview,
   PipelineProfile,
   ResourceLink,
   RunStatus,
@@ -487,17 +488,17 @@ function materializeStage({
     artifacts: rest.artifacts.map((a) => ({ ...a })),
     logs: rest.logs.map((l) => ({ ...l })),
   }
-  if (startedAgo) {
+  if (startedAgo !== undefined) {
     stage.startedAt = isoAgo(startedAgo)
   }
-  if (finishedAgo) {
+  if (finishedAgo !== undefined) {
     stage.finishedAt = isoAgo(finishedAgo)
   }
-  if (stage.startedAt && stage.finishedAt && !rest.durationSec) {
+  if (stage.startedAt && stage.finishedAt && rest.durationSec === undefined) {
     stage.durationSec = Math.max(0, startedAgo! - finishedAgo!)
-  } else if (rest.durationSec) {
+  } else if (rest.durationSec !== undefined) {
     stage.durationSec = rest.durationSec
-  } else if (estimatedDurationSec) {
+  } else if (estimatedDurationSec !== undefined) {
     stage.durationSec = estimatedDurationSec
   }
   return stage
@@ -519,7 +520,7 @@ export function buildPipelineRun(id: string): Pipeline | undefined {
   } as Pipeline
 }
 
-export function listPipelinePreviews() {
+export function listPipelinePreviews(): PipelinePreview[] {
   return pipelineTemplates.map((p) => ({
     id: p.id,
     name: p.profile.name,

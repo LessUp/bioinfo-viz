@@ -32,3 +32,6 @@
     - 修复 `StepDrawer` / `TimelineView` 的条件调用 Hook（`react-hooks/rules-of-hooks`）。
   - `apps/genome-align-viz`：
     - ESLint 增加 Node globals（用于 `postcss.config.*` 等配置文件），并将 `any/空 catch/未使用变量` 降级为 warning，避免 CI 被非关键规则阻塞。
+
+- 分支合并：
+  - 将 `origin/codex/plan-future-development-of-visualization-site-szlsm0` 合并到 `master`，冲突解决以 workspace/CI 重构版实现为准，并补齐 `PipelinePreview` 类型与更严格的 `pipeline-presets` 时序字段处理。
