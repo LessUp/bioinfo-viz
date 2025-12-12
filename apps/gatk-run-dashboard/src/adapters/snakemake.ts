@@ -53,9 +53,9 @@ export function parseSnakemakeMetadata(meta: any): Run {
     }
   }
   let runStatus: RunStatus = 'Queued'
-  if (steps.some(s => s.status === 'Running')) runStatus = 'Running'
-  if (steps.some(s => s.status === 'Failed')) runStatus = 'Failed'
-  if (steps.length && steps.every(s => s.status === 'Succeeded')) runStatus = 'Succeeded'
+  if (steps.some((s) => s.status === 'Running')) runStatus = 'Running'
+  if (steps.some((s) => s.status === 'Failed')) runStatus = 'Failed'
+  if (steps.length && steps.every((s) => s.status === 'Succeeded')) runStatus = 'Succeeded'
   const run: Run = {
     id: 'snakemake-' + Date.now(),
     name,

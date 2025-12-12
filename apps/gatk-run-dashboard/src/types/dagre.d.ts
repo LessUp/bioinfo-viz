@@ -1,1 +1,1 @@
-declare module 'dagre';
+declare module 'dagre'

@@ -19,8 +19,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: `kroki failed ${res.status}: ${text}` }, { status: 502 })
     }
     const svg = await res.text()
-    return new NextResponse(svg, { headers: { 'content-type': 'image/svg+xml', 'cache-control': 'public, max-age=60' } })
-  } catch (e: any) {
-    return NextResponse.json({ error: String(e?.message || e) }, { status: 500 })
+    return new NextResponse(svg, {
+      headers: { 'content-type': 'image/svg+xml', 'cache-control': 'public, max-age=60' },
+    })
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

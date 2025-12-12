@@ -6,12 +6,9 @@
   "workspaceFolder": "/workspaces/bioinfo-visualizer",
   "customizations": {
     "vscode": {
-      "extensions": [
-        "esbenp.prettier-vscode",
-        "dbaeumer.vscode-eslint"
-      ]
+      "extensions": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
     }
   },
   "forwardPorts": [3000, 5170, 5171, 5172, 5173, 5174, 5175, 5176, 5177, 5178],
-  "postCreateCommand": "npm i"
+  "postCreateCommand": "npm ci"
 }

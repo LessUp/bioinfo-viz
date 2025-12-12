@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npx serve -l 5175 ."
+    "dev": "serve -l 5175 ."
   }
 }

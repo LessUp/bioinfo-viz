@@ -32,23 +32,22 @@
   - `apps/arith-compress-viz`
   - `apps/smith-waterman-viz`
   - `slides/ngs-vs-tgs`
-  - 可选：本地静态服务 `npx serve .` 或 `python -m http.server 8000`
+  - 可选：本地静态服务 `serve .` 或 `python -m http.server 8000`
 
 - Next.js 应用：
   - `apps/bioinfo-pipeline-web`
   - ```bash
-    cd apps/bioinfo-pipeline-web
-    npm i
-    npm run dev   # http://localhost:3000
+    npm ci
+    npm run dev:bioinfo   # http://localhost:3000
     ```
 
 - Vite + React 应用：
   - `apps/gatk-run-dashboard`
   - `apps/genome-align-viz`
   - ```bash
-    cd apps/gatk-run-dashboard # 或 genome-align-viz
-    npm i
-    npm run dev   # genome-align-viz: 5173 (预览 5174)；gatk-run-dashboard: 5176 (预览 5177)
+    npm ci
+    npm run dev:gatk   # 5176 (预览 5177)
+    npm run dev:align  # 5173 (预览 5174)
     ```
 
 ## 工作区脚本（根目录）
@@ -76,7 +75,7 @@
 
 ## 开发建议
 
-- Node 版本：建议 >= 18
+- Node 版本：建议 >= 20
 - 代码风格：推荐使用 VS Code + Prettier（未强制）
 - 行尾与文本：已通过 `.gitattributes` 统一（脚本类按平台设定 eol）
 - 提交规范：建议遵循 Conventional Commits（可在后续引入）

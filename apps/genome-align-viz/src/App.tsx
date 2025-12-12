@@ -8,7 +8,14 @@ import ControlPanel from './components/ControlPanel'
 import TeachingPanel from './components/TeachingPanel'
 import { useAppStore } from './store/useAppStore'
 import VariantPanel, { type VariantItem } from './components/VariantPanel'
-import type { AlignChunkEvent, CoverageUpdateEvent, PipelineStepName, PipelineStatus, ReadAlignment, StreamEvent } from './types/events'
+import type {
+  AlignChunkEvent,
+  CoverageUpdateEvent,
+  PipelineStepName,
+  PipelineStatus,
+  ReadAlignment,
+  StreamEvent,
+} from './types/events'
 import { startStream } from './streams/streamClient'
 import { alignedLengthFromCigar } from './utils/cigar'
 
@@ -18,8 +25,18 @@ export default function App() {
   const jobId = 'job-demo-001'
   const { region, filters, connection } = useAppStore()
 
-  const stepNames: PipelineStepName[] = ['qc','index','align','sort','dedup','variant','annotate']
-  const [steps, setSteps] = useState<Step[]>(stepNames.map(n => ({ name: n, status: 'queued', progress: 0 })))
+  const stepNames: PipelineStepName[] = [
+    'qc',
+    'index',
+    'align',
+    'sort',
+    'dedup',
+    'variant',
+    'annotate',
+  ]
+  const [steps, setSteps] = useState<Step[]>(
+    stepNames.map((n) => ({ name: n, status: 'queued', progress: 0 }))
+  )
   const [reads, setReads] = useState<ReadAlignment[]>([])
   const [logs, setLogs] = useState<LogItem[]>([])
   const [binsMap, setBinsMap] = useState<Map<number, number>>(new Map())
@@ -34,7 +51,9 @@ export default function App() {
   const workerRef = useRef<Worker | null>(null)
 
   useEffect(() => {
-    const w = new Worker(new URL('./workers/coverageWorker.ts', import.meta.url), { type: 'module' })
+    const w = new Worker(new URL('./workers/coverageWorker.ts', import.meta.url), {
+      type: 'module',
+    })
     workerRef.current = w
     w.onmessage = (ev: MessageEvent) => {
       const data = ev.data as any
@@ -44,7 +63,10 @@ export default function App() {
         setAvgCoverage(data.avg as number)
       }
     }
-    return () => { w.terminate(); workerRef.current = null }
+    return () => {
+      w.terminate()
+      workerRef.current = null
+    }
   }, [])
 
   useEffect(() => {
@@ -64,45 +86,69 @@ export default function App() {
     setMismatchRate(0)
 
     if (connection.connected) {
-      stopFn = startStream({ sourceType: connection.sourceType, url: connection.url, jobId, region }, (e: StreamEvent) => {
-      if (e.type === 'pipeline.step') {
-        setSteps((prev: Step[]) => prev.map((s: Step) => s.name === e.payload.name ? { ...s, status: e.payload.status, progress: e.payload.progress ?? s.progress } : s))
-        if (e.payload.metrics?.qps != null) setQps(e.payload.metrics.qps)
-      } else if (e.type === 'align.chunk') {
-        const ev = e as AlignChunkEvent
-        setReads((prev: ReadAlignment[]) => {
-          const next = [...prev, ...ev.payload.reads]
-          const cap = 800
-          return next.length > cap ? next.slice(next.length - cap) : next
-        })
-        setProcessedReads((v: number) => v + ev.payload.reads.length)
-        // mismatch rate（按读段错配数/对齐碱基数近似）
-        for (const r of ev.payload.reads) {
-          const mism = r.mismatches?.length ?? 0
-          const len = alignedLengthFromCigar(r.cigar)
-          totalMismatches += mism
-          totalAligned += len
+      stopFn = startStream(
+        { sourceType: connection.sourceType, url: connection.url, jobId, region },
+        (e: StreamEvent) => {
+          if (e.type === 'pipeline.step') {
+            setSteps((prev: Step[]) =>
+              prev.map((s: Step) =>
+                s.name === e.payload.name
+                  ? { ...s, status: e.payload.status, progress: e.payload.progress ?? s.progress }
+                  : s
+              )
+            )
+            if (e.payload.metrics?.qps != null) setQps(e.payload.metrics.qps)
+          } else if (e.type === 'align.chunk') {
+            const ev = e as AlignChunkEvent
+            setReads((prev: ReadAlignment[]) => {
+              const next = [...prev, ...ev.payload.reads]
+              const cap = 800
+              return next.length > cap ? next.slice(next.length - cap) : next
+            })
+            setProcessedReads((v: number) => v + ev.payload.reads.length)
+            // mismatch rate（按读段错配数/对齐碱基数近似）
+            for (const r of ev.payload.reads) {
+              const mism = r.mismatches?.length ?? 0
+              const len = alignedLengthFromCigar(r.cigar)
+              totalMismatches += mism
+              totalAligned += len
+            }
+            if (totalAligned > 0) setMismatchRate(totalMismatches / totalAligned)
+          } else if (e.type === 'coverage.update') {
+            const ev = e as CoverageUpdateEvent
+            workerRef.current?.postMessage({ type: 'coverage.update', payload: ev.payload })
+          } else if (e.type === 'variant.called') {
+            const v = (e as any).payload as VariantItem
+            setVariants((prev) => {
+              const next = [v, ...prev]
+              return next.slice(0, 50)
+            })
+          } else if (e.type === 'log.line') {
+            setLogs((prev: LogItem[]) => [
+              ...prev,
+              { ts: e.ts, level: e.payload.level, msg: e.payload.msg },
+            ])
+          } else if (e.type === 'error') {
+            setLogs((prev: LogItem[]) => [
+              ...prev,
+              { ts: e.ts, level: 'error', msg: e.payload.msg },
+            ])
+          }
         }
-        if (totalAligned > 0) setMismatchRate(totalMismatches / totalAligned)
-      } else if (e.type === 'coverage.update') {
-        const ev = e as CoverageUpdateEvent
-        workerRef.current?.postMessage({ type: 'coverage.update', payload: ev.payload })
-      } else if (e.type === 'variant.called') {
-        const v = (e as any).payload as VariantItem
-        setVariants((prev) => {
-          const next = [v, ...prev]
-          return next.slice(0, 50)
-        })
-      } else if (e.type === 'log.line') {
-        setLogs((prev: LogItem[]) => [...prev, { ts: e.ts, level: e.payload.level, msg: e.payload.msg }])
-      } else if (e.type === 'error') {
-        setLogs((prev: LogItem[]) => [...prev, { ts: e.ts, level: 'error', msg: e.payload.msg }])
-      }
-      })
+      )
     }
-    return () => { if (stopFn) stopFn() }
-  // re-connect on connection options change
-  }, [connection.connected, connection.sourceType, connection.url, region.chrom, region.start, region.end])
+    return () => {
+      if (stopFn) stopFn()
+    }
+    // re-connect on connection options change
+  }, [
+    connection.connected,
+    connection.sourceType,
+    connection.url,
+    region.chrom,
+    region.start,
+    region.end,
+  ])
 
   const bins = useMemo((): { start: number; cov: number }[] => {
     const arr: { start: number; cov: number }[] = []
@@ -118,7 +164,9 @@ export default function App() {
       <div className="flex items-end justify-between">
         <div>
           <div className="text-2xl font-semibold">基因比对动态可视化</div>
-          <div className="text-neutral-400 text-sm mt-1">任务 {jobId} · 区域 {region.chrom}:{region.start}-{region.end}</div>
+          <div className="text-neutral-400 text-sm mt-1">
+            任务 {jobId} · 区域 {region.chrom}:{region.start}-{region.end}
+          </div>
         </div>
       </div>
 

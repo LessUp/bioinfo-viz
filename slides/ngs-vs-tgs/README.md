@@ -3,6 +3,7 @@
 对比二代测序（NGS）与三代测序（TGS）的教学幻灯，纯静态页面，包含脚本与样式文件。
 
 ## 快速开始
+
 - 直接打开 `index.html`（建议使用 Chrome/Edge）
 - 或使用本地静态服务器（推荐）：
   ```bash
@@ -10,6 +11,7 @@
   ```
 
 ## 目录结构
+
 ```
 slides/ngs-vs-tgs/
 ├─ index.html
@@ -19,4 +21,5 @@ slides/ngs-vs-tgs/
 ```
 
 ## 许可证
+
 遵循仓库根目录的 LICENSE（MIT）。

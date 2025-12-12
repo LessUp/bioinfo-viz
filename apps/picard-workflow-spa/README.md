@@ -3,6 +3,7 @@
 一个零依赖、可直接打开的前端单页，用于可视化与操作 Picard 的基因测序分析流程（WGS/WES/RNA）。内置 Mermaid 流程图、步骤详情与命令示例、参数占位符面板、步骤选择、一键复制/导出脚本（.sh/.cmd/.ps1）、配置导入导出，以及导出流程图 SVG/PNG。
 
 ## 亮点功能
+
 - 流程切换：WGS / WES / RNA
 - 流程图交互：点击节点联动右侧步骤详情
 - 参数占位符：在面板中配置 `${REFERENCE}` 等，实时替换示例命令
@@ -15,6 +16,7 @@
 - 本地持久化：自动保存参数/步骤/流程/前缀/引号设置
 
 ## 快速开始
+
 - 方式一：双击打开 `index.html`（建议使用 Chrome/Edge）
 - 方式二：本地静态服务（任选其一）
   - Python: `python -m http.server 8000`
@@ -22,6 +24,7 @@
   - 打开浏览器访问 `http://localhost:8000`（或命令输出地址）
 
 ## 使用指南
+
 - 顶部切换 WGS/WES/RNA
 - 左侧流程图点击任一节点，右侧显示步骤说明与命令
 - 右侧“参数配置”：
@@ -32,6 +35,7 @@
 - 顶部工具：复制全流程/导出脚本（.sh/.cmd/.ps1）/导出 SVG/PNG/导入导出配置
 
 ## 参数占位符（示例）
+
 - REFERENCE, DICT_OUT
 - ALIGNED_BAM, RG_BAM, SORTED_BAM, DEDUP_BAM, DEDUP_METRICS
 - ALIGN_SUMMARY, WGS_METRICS, GC_BIAS_TXT, GC_BIAS_PDF, GC_SUMMARY
@@ -42,6 +46,7 @@
 以上占位符将替换命令中的 `${PLACEHOLDER}`。可在右侧面板修改并实时生效。
 
 ## 导出说明
+
 - .sh：自动添加 `#!/usr/bin/env bash` 与 `set -euo pipefail`
 - .cmd：自动合并 bash 续行符（`\`）为同一行，使用 Windows 换行
 - .ps1：PowerShell 脚本，每行一条命令
@@ -50,11 +55,13 @@
   - 校验所有被选步骤参数是否齐备（未填则禁用导出/复制）
 
 ## 配置导入导出
+
 - 导出配置：生成包含 `workflow`、`params`、`included`、`runner`、`quoteValues` 的 JSON
 - 导入配置：从 JSON 恢复同上内容
 - 本地持久化：自动写入浏览器 localStorage，无需手动保存
 
 ## 工作流与步骤（概览）
+
 - WGS：CreateSequenceDictionary → AddOrReplaceReadGroups → SortSam → MarkDuplicates → BuildBamIndex → ValidateSamFile → 统计（CollectAlignmentSummaryMetrics / CollectWgsMetrics / CollectGcBiasMetrics / CollectInsertSizeMetrics）
 - WES：在 WGS 基础上使用 CollectHsMetrics
 - RNA：在 WGS 基础上使用 CollectRnaSeqMetrics（比对通常由 STAR 等完成）
@@ -62,6 +69,7 @@
 详细说明见 `docs/WORKFLOWS.md`。
 
 ## 目录结构
+
 ```
 .
 ├─ index.html                  # 单页应用（可直接打开）
@@ -88,6 +96,7 @@
 ```
 
 ## 部署到 GitHub Pages
+
 1. 新建 GitHub 仓库并推送此项目文件
 2. 打开仓库 Settings → Pages
 3. Source 选择 `Deploy from a branch`
@@ -97,12 +106,15 @@
 可选：也可部署到 Netlify、Vercel 或任意静态站点托管平台。
 
 ## 浏览器兼容
+
 - 现代浏览器（Chrome/Edge/Firefox/Safari 最新版）
 - 若 file:// 下复制剪贴板受限，可手动复制命令，或使用本地静态服务器方式预览
 
 ## 许可证
+
 本项目遵循仓库根目录的 LICENSE（MIT）。如本目录存在附带协议说明，请以仓库根许可证为准。
 
 ## 致谢
+
 - Picard 工具与 GATK 生态
 - Mermaid、TailwindCSS、Alpine.js、highlight.js

@@ -1,6 +1,10 @@
 import React from 'react'
 
-export default function MetricCards({ metrics }: { metrics: { processedReads: number; qps: number; avgCoverage: number; mismatchRate: number } }) {
+export default function MetricCards({
+  metrics,
+}: {
+  metrics: { processedReads: number; qps: number; avgCoverage: number; mismatchRate: number }
+}) {
   const items = [
     { label: '已处理Reads', value: metrics.processedReads.toLocaleString() },
     { label: '当前QPS', value: Math.round(metrics.qps).toLocaleString() },

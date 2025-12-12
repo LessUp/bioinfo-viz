@@ -21,7 +21,10 @@ export async function exportReportPDF(run: Run | null) {
     const imgProps = (doc as any).getImageProperties(url)
     const imgWidth = pageWidth - 48
     const imgHeight = imgProps.height * (imgWidth / imgProps.width)
-    if (y + imgHeight > doc.internal.pageSize.getHeight() - 24) { doc.addPage(); y = 24 }
+    if (y + imgHeight > doc.internal.pageSize.getHeight() - 24) {
+      doc.addPage()
+      y = 24
+    }
     doc.text('DAG', 24, y)
     y += 10
     doc.addImage(url, 'PNG', 24, y, imgWidth, imgHeight)
@@ -33,7 +36,10 @@ export async function exportReportPDF(run: Run | null) {
     const imgProps = (doc as any).getImageProperties(url)
     const imgWidth = pageWidth - 48
     const imgHeight = imgProps.height * (imgWidth / imgProps.width)
-    if (y + imgHeight > doc.internal.pageSize.getHeight() - 24) { doc.addPage(); y = 24 }
+    if (y + imgHeight > doc.internal.pageSize.getHeight() - 24) {
+      doc.addPage()
+      y = 24
+    }
     doc.text('时间轴', 24, y)
     y += 10
     doc.addImage(url, 'PNG', 24, y, imgWidth, imgHeight)

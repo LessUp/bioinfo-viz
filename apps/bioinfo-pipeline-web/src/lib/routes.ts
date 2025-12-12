@@ -23,12 +23,12 @@ export const ROUTES = {
     rnaSeqGuide: 'https://rnaseq101.example.com' as const,
     singleCellHub: 'https://singlecellhub.example.com' as const,
   },
-} as const;
+} as const
 
-type ValueOf<T> = T[keyof T];
+type ValueOf<T> = T[keyof T]
 export type RoutePath =
-  | ValueOf<typeof ROUTES['docs']>
-  | ValueOf<typeof ROUTES['slides']>
-  | ValueOf<typeof ROUTES['apps']>
-  | ValueOf<typeof ROUTES['pipelines']>
-  | ValueOf<typeof ROUTES['external']>;
+  | ValueOf<(typeof ROUTES)['docs']>
+  | ValueOf<(typeof ROUTES)['slides']>
+  | ValueOf<(typeof ROUTES)['apps']>
+  | ValueOf<(typeof ROUTES)['pipelines']>
+  | ValueOf<(typeof ROUTES)['external']>

@@ -1,12 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
 
-export interface Bin { start: number; cov: number }
+export interface Bin {
+  start: number
+  cov: number
+}
 
-export default function CoverageTrack({ region, binSize, bins }: { region: { chrom: string; start: number; end: number }; binSize: number; bins: Bin[] }) {
+export default function CoverageTrack({
+  region,
+  binSize,
+  bins,
+}: {
+  region: { chrom: string; start: number; end: number }
+  binSize: number
+  bins: Bin[]
+}) {
   const ref = useRef<HTMLCanvasElement>(null)
   const { setRegion, centerOn } = useAppStore()
-  const [sel, setSel] = useState<{ x0: number; x1: number; dragging: boolean }>({ x0: -1, x1: -1, dragging: false })
+  const [sel, setSel] = useState<{ x0: number; x1: number; dragging: boolean }>({
+    x0: -1,
+    x1: -1,
+    dragging: false,
+  })
 
   useEffect(() => {
     const canvas = ref.current
@@ -24,8 +39,8 @@ export default function CoverageTrack({ region, binSize, bins }: { region: { chr
     ctx.fillRect(0, 0, w, h)
 
     const span = region.end - region.start
-    const xScale = (pos: number) => (pos - region.start) / span * w
-    const maxCov = Math.max(1, ...bins.map(b => b.cov))
+    const xScale = (pos: number) => ((pos - region.start) / span) * w
+    const maxCov = Math.max(1, ...bins.map((b) => b.cov))
 
     ctx.fillStyle = '#4b5563'
     for (const b of bins) {
@@ -62,7 +77,7 @@ export default function CoverageTrack({ region, binSize, bins }: { region: { chr
       if (!sel.dragging) return
       const rect = canvas.getBoundingClientRect()
       const x = e.clientX - rect.left
-      setSel(s => ({ ...s, x1: x }))
+      setSel((s) => ({ ...s, x1: x }))
     }
     const onUp = (e: PointerEvent) => {
       if (!sel.dragging) return

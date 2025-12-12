@@ -9,9 +9,9 @@ export default {
           Running: '#60a5fa',
           Succeeded: '#22c55e',
           Failed: '#ef4444',
-          Aborted: '#f59e0b'
-        }
-      }
+          Aborted: '#f59e0b',
+        },
+      },
     },
   },
   plugins: [],

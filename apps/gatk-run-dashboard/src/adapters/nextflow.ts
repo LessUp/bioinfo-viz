@@ -20,9 +20,18 @@ function phaseOf(label: string): Phase {
 
 export function parseNextflowTrace(text: string): Run {
   const lines = (text || '').split(/\r?\n/).filter(Boolean)
-  if (!lines.length) return { id: 'nextflow-empty', name: 'nextflow', pipeline: 'Germline', createdAt: new Date().toISOString(), status: 'Queued', steps: [], edges: [] }
+  if (!lines.length)
+    return {
+      id: 'nextflow-empty',
+      name: 'nextflow',
+      pipeline: 'Germline',
+      createdAt: new Date().toISOString(),
+      status: 'Queued',
+      steps: [],
+      edges: [],
+    }
   const headers = lines[0].split(/\t/)
-  const idx = (name: string) => headers.findIndex(h => h.toLowerCase() === name)
+  const idx = (name: string) => headers.findIndex((h) => h.toLowerCase() === name)
   const iProcess = idx('process')
   const iTaskId = idx('task_id') >= 0 ? idx('task_id') : idx('hash')
   const iStatus = idx('status')
@@ -48,9 +57,9 @@ export function parseNextflowTrace(text: string): Run {
     })
   }
   let runStatus: RunStatus = 'Succeeded'
-  if (steps.some(s => s.status === 'Failed')) runStatus = 'Failed'
-  else if (steps.some(s => s.status === 'Running')) runStatus = 'Running'
-  else if (steps.every(s => s.status === 'Queued')) runStatus = 'Queued'
+  if (steps.some((s) => s.status === 'Failed')) runStatus = 'Failed'
+  else if (steps.some((s) => s.status === 'Running')) runStatus = 'Running'
+  else if (steps.every((s) => s.status === 'Queued')) runStatus = 'Queued'
   const run: Run = {
     id: 'nextflow-' + Date.now(),
     name: 'nextflow-run',

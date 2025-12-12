@@ -1,21 +1,21 @@
-import type { ResourceLink } from '@/types/pipeline';
-import { ROUTES } from '@/lib/routes';
+import type { ResourceLink } from '@/types/pipeline'
+import { ROUTES } from '@/lib/routes'
 
 export interface LearningStep {
-  id: string;
-  title: string;
-  description: string;
-  target?: string;
-  resources?: ResourceLink[];
+  id: string
+  title: string
+  description: string
+  target?: string
+  resources?: ResourceLink[]
 }
 
 export interface LearningPath {
-  id: string;
-  label: string;
-  summary: string;
-  persona: string;
-  skillFocus: string[];
-  steps: LearningStep[];
+  id: string
+  label: string
+  summary: string
+  persona: string
+  skillFocus: string[]
+  steps: LearningStep[]
 }
 
 const docsResource: ResourceLink = {
@@ -23,28 +23,28 @@ const docsResource: ResourceLink = {
   description: '复习测序流程与数据格式，建立知识背景。',
   href: ROUTES.docs.ngsAnalysisGuide,
   kind: 'doc',
-};
+}
 
 const bwaResource: ResourceLink = {
   title: 'BWA 算法交互演示',
   description: '通过动画掌握种子比对与评分矩阵。',
   href: ROUTES.apps.bwaAlgorithmViz,
   kind: 'app',
-};
+}
 
 const gatkResource: ResourceLink = {
   title: 'GATK 运行监控',
   description: '观察流程监控指标与日志。',
   href: ROUTES.apps.gatkRunDashboard,
   kind: 'app',
-};
+}
 
 const slidesResource: ResourceLink = {
   title: 'NGS vs TGS 幻灯片',
   description: '课堂可直接引用的比较幻灯片。',
   href: ROUTES.slides.ngsVsTgs,
   kind: 'doc',
-};
+}
 
 export const learningPaths: LearningPath[] = [
   {
@@ -130,8 +130,8 @@ export const learningPaths: LearningPath[] = [
       },
     ],
   },
-];
+]
 
 export function getLearningPath(id: string) {
-  return learningPaths.find((p) => p.id === id) ?? learningPaths[0];
+  return learningPaths.find((p) => p.id === id) ?? learningPaths[0]
 }

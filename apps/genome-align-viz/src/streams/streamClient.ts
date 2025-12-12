@@ -29,19 +29,30 @@ export function startStream(opts: ConnectOptions, onEvent: (e: StreamEvent) => v
         try {
           const obj = JSON.parse(ev.data) as StreamEvent
           onEvent(obj)
-        } catch { /* noop */ }
+        } catch {
+          /* noop */
+        }
       }
-      es.onopen = () => { attempt = 0 }
+      es.onopen = () => {
+        attempt = 0
+      }
       es.onerror = () => {
         if (stopped) return
-        try { es?.close() } catch {}
+        try {
+          es?.close()
+        } catch {}
         attempt += 1
         const delay = Math.min(30000, 1000 * Math.pow(2, attempt))
         setTimeout(connect, delay)
       }
     }
     connect()
-    return () => { stopped = true; try { es?.close() } catch {} }
+    return () => {
+      stopped = true
+      try {
+        es?.close()
+      } catch {}
+    }
   }
   if (opts.sourceType === 'ws') {
     if (!opts.url) throw new Error('WebSocket 需要提供 url')
@@ -51,12 +62,16 @@ export function startStream(opts: ConnectOptions, onEvent: (e: StreamEvent) => v
     const connect = () => {
       if (stopped) return
       ws = new WebSocket(opts.url!)
-      ws.onopen = () => { attempt = 0 }
+      ws.onopen = () => {
+        attempt = 0
+      }
       ws.onmessage = (ev: MessageEvent<string>) => {
         try {
           const obj = JSON.parse(ev.data) as StreamEvent
           onEvent(obj)
-        } catch { /* noop */ }
+        } catch {
+          /* noop */
+        }
       }
       ws.onclose = () => {
         if (stopped) return
@@ -64,10 +79,17 @@ export function startStream(opts: ConnectOptions, onEvent: (e: StreamEvent) => v
         const delay = Math.min(30000, 1000 * Math.pow(2, attempt))
         setTimeout(connect, delay)
       }
-      ws.onerror = () => { /* wait for onclose to reconnect */ }
+      ws.onerror = () => {
+        /* wait for onclose to reconnect */
+      }
     }
     connect()
-    return () => { stopped = true; try { ws?.close() } catch {} }
+    return () => {
+      stopped = true
+      try {
+        ws?.close()
+      } catch {}
+    }
   }
   return () => {}
 }

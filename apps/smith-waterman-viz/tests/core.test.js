@@ -21,7 +21,13 @@ describe('DP core', () => {
       const [ci, cj] = tb.path[i]
       const di = ci - pi
       const dj = cj - pj
-      expect([[1, 1], [1, 0], [0, 1]].some(([x, y]) => x === di && y === dj)).toBe(true)
+      expect(
+        [
+          [1, 1],
+          [1, 0],
+          [0, 1],
+        ].some(([x, y]) => x === di && y === dj)
+      ).toBe(true)
     }
   })
   it('path-consistency on SW', () => {
@@ -32,7 +38,13 @@ describe('DP core', () => {
       const [ci, cj] = tb.path[i]
       const di = ci - pi
       const dj = cj - pj
-      expect([[1, 1], [1, 0], [0, 1]].some(([x, y]) => x === di && y === dj)).toBe(true)
+      expect(
+        [
+          [1, 1],
+          [1, 0],
+          [0, 1],
+        ].some(([x, y]) => x === di && y === dj)
+      ).toBe(true)
     }
   })
   it('empty input handled', () => {

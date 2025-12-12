@@ -7,23 +7,27 @@ import { TimelineView } from './components/TimelineView'
 import { StepDrawer } from './components/StepDrawer'
 
 export default function App() {
-  const view = useRunStore(s => s.view)
-  const loadMock = useRunStore(s => s.loadFromMock)
-  const run = useRunStore(s => s.run)
-  const autoRefresh = useRunStore(s => s.autoRefresh)
-  const autoRefreshInterval = useRunStore(s => s.autoRefreshInterval)
-  const refreshOnce = useRunStore(s => s.refreshOnce)
+  const view = useRunStore((s) => s.view)
+  const loadMock = useRunStore((s) => s.loadFromMock)
+  const run = useRunStore((s) => s.run)
+  const autoRefresh = useRunStore((s) => s.autoRefresh)
+  const autoRefreshInterval = useRunStore((s) => s.autoRefreshInterval)
+  const refreshOnce = useRunStore((s) => s.refreshOnce)
 
   useEffect(() => {
     loadMock()
   }, [loadMock])
 
   useEffect(() => {
-    const isTerminal = (status?: string) => status === 'Succeeded' || status === 'Failed' || status === 'Aborted'
+    const isTerminal = (status?: string) =>
+      status === 'Succeeded' || status === 'Failed' || status === 'Aborted'
     if (!autoRefresh || !run || isTerminal(run.status)) return
-    const id = setInterval(() => {
-      refreshOnce()
-    }, Math.max(1000, autoRefreshInterval))
+    const id = setInterval(
+      () => {
+        refreshOnce()
+      },
+      Math.max(1000, autoRefreshInterval)
+    )
     return () => clearInterval(id)
   }, [autoRefresh, autoRefreshInterval, run?.id, run?.status, refreshOnce])
 
@@ -36,9 +40,13 @@ export default function App() {
         </aside>
         <main className="flex-1 overflow-hidden">
           {view === 'dag' ? (
-            <div id="dag-container" className="h-full"><DAGView /></div>
+            <div id="dag-container" className="h-full">
+              <DAGView />
+            </div>
           ) : (
-            <div id="timeline-container" className="h-full"><TimelineView /></div>
+            <div id="timeline-container" className="h-full">
+              <TimelineView />
+            </div>
           )}
         </main>
         <StepDrawer />

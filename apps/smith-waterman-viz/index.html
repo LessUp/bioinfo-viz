@@ -1,95 +1,107 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smith-Waterman / Needleman-Wunsch 演示</title>
-  <link rel="stylesheet" href="./styles.css" />
-</head>
-<body>
-  <header class="app-header">
-    <div class="brand">局部/全局序列比对演示</div>
-    <div class="sub">动态规划矩阵、带状约束与回溯路径动画</div>
-  </header>
-  <main class="container">
-    <section class="controls-panel">
-      <div class="panel-section">
-        <label class="field"><span>序列 A：</span><input id="seqA" type="text" value="GATTACA" /></label>
-      </div>
-      <div class="panel-section">
-        <label class="field"><span>序列 B：</span><input id="seqB" type="text" value="GCATGCU" /></label>
-      </div>
-      <div class="panel-section row">
-        <label class="field"><span>匹配奖励</span><input id="scoreMatch" type="number" value="2" /></label>
-        <label class="field"><span>错配惩罚</span><input id="scoreMismatch" type="number" value="-1" /></label>
-        <label class="field"><span>空位惩罚</span><input id="scoreGap" type="number" value="-1" /></label>
-      </div>
-      <div class="panel-section row">
-        <button id="buildBtn" class="btn primary">构建矩阵</button>
-        <button id="playBtn" class="btn">播放</button>
-        <button id="pauseBtn" class="btn">暂停</button>
-        <button id="stepBtn" class="btn">单步</button>
-        <button id="resetBtn" class="btn danger">重置</button>
-      </div>
-      <div class="panel-section row">
-        <label class="field"><span>播放速度</span>
-          <input id="speed" type="range" min="0.25" max="2" step="0.25" value="1" />
-        </label>
-        <div class="chip" id="speedLabel">1.00x</div>
-      </div>
-      <div class="panel-section">
-        <label class="field"><span>模式</span>
-          <select id="mode">
-            <option value="sw">Smith-Waterman（局部）</option>
-            <option value="nw">Needleman-Wunsch（全局）</option>
-          </select>
-        </label>
-      </div>
-      <div class="panel-section">
-        <div style="color:#9fb2c8; font-size:12px; margin-bottom:6px;">示例预设</div>
-        <div class="row">
-          <button class="btn" id="preset1">预设1：GATTACA vs GCATGCU</button>
-          <button class="btn" id="preset2">预设2：BAOBAB vs BAHABA</button>
-          <button class="btn" id="preset3">预设3：AAAAAA vs AAAA</button>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Smith-Waterman / Needleman-Wunsch 演示</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">局部/全局序列比对演示</div>
+      <div class="sub">动态规划矩阵、带状约束与回溯路径动画</div>
+    </header>
+    <main class="container">
+      <section class="controls-panel">
+        <div class="panel-section">
+          <label class="field"
+            ><span>序列 A：</span><input id="seqA" type="text" value="GATTACA"
+          /></label>
         </div>
-      </div>
-      <div class="panel-section">
-        <div class="log" id="logPanel"></div>
-      </div>
-      <div class="panel-section">
-        <div class="card">
-          <div class="card-title">当前步骤解读</div>
-          <div class="log small" id="stepDetails">尚未开始，请点击“构建矩阵”。</div>
+        <div class="panel-section">
+          <label class="field"
+            ><span>序列 B：</span><input id="seqB" type="text" value="GCATGCU"
+          /></label>
         </div>
-      </div>
-      <div class="panel-section">
-        <div class="card">
-          <div class="card-title">教学引导</div>
-          <ul class="note-list" id="teachingNotes"></ul>
+        <div class="panel-section row">
+          <label class="field"
+            ><span>匹配奖励</span><input id="scoreMatch" type="number" value="2"
+          /></label>
+          <label class="field"
+            ><span>错配惩罚</span><input id="scoreMismatch" type="number" value="-1"
+          /></label>
+          <label class="field"
+            ><span>空位惩罚</span><input id="scoreGap" type="number" value="-1"
+          /></label>
         </div>
-      </div>
-    </section>
-    <section class="viz-panel">
-      <div class="row" style="margin-bottom:8px; gap:12px; align-items:flex-start;">
-        <div class="card" style="flex:1; padding:8px;">
-          <div style="color:#9fb2c8; font-size:12px; margin-bottom:6px;">输入</div>
-          <div id="inputPanel" class="log"></div>
+        <div class="panel-section row">
+          <button id="buildBtn" class="btn primary">构建矩阵</button>
+          <button id="playBtn" class="btn">播放</button>
+          <button id="pauseBtn" class="btn">暂停</button>
+          <button id="stepBtn" class="btn">单步</button>
+          <button id="resetBtn" class="btn danger">重置</button>
         </div>
-        <div class="card" style="flex:1; padding:8px;">
-          <div style="color:#9fb2c8; font-size:12px; margin-bottom:6px;">输出对齐</div>
-          <div id="outputPanel" class="log"></div>
+        <div class="panel-section row">
+          <label class="field"
+            ><span>播放速度</span>
+            <input id="speed" type="range" min="0.25" max="2" step="0.25" value="1" />
+          </label>
+          <div class="chip" id="speedLabel">1.00x</div>
         </div>
-      </div>
-      <canvas id="dpCanvas" width="900" height="520"></canvas>
-    </section>
-  </main>
-  <footer class="app-footer">
-    <div>说明：该演示展示 DP 矩阵的填充与回溯过程，动态高亮更新单元与路径。</div>
-  </footer>
-  <script type="module">
-    import * as DPCore from './core.js';
-    window.DPCore = DPCore;
-  </script>
-  <script defer src="./app.js"></script>
-</body>
+        <div class="panel-section">
+          <label class="field"
+            ><span>模式</span>
+            <select id="mode">
+              <option value="sw">Smith-Waterman（局部）</option>
+              <option value="nw">Needleman-Wunsch（全局）</option>
+            </select>
+          </label>
+        </div>
+        <div class="panel-section">
+          <div style="color: #9fb2c8; font-size: 12px; margin-bottom: 6px">示例预设</div>
+          <div class="row">
+            <button class="btn" id="preset1">预设1：GATTACA vs GCATGCU</button>
+            <button class="btn" id="preset2">预设2：BAOBAB vs BAHABA</button>
+            <button class="btn" id="preset3">预设3：AAAAAA vs AAAA</button>
+          </div>
+        </div>
+        <div class="panel-section">
+          <div class="log" id="logPanel"></div>
+        </div>
+        <div class="panel-section">
+          <div class="card">
+            <div class="card-title">当前步骤解读</div>
+            <div class="log small" id="stepDetails">尚未开始，请点击“构建矩阵”。</div>
+          </div>
+        </div>
+        <div class="panel-section">
+          <div class="card">
+            <div class="card-title">教学引导</div>
+            <ul class="note-list" id="teachingNotes"></ul>
+          </div>
+        </div>
+      </section>
+      <section class="viz-panel">
+        <div class="row" style="margin-bottom: 8px; gap: 12px; align-items: flex-start">
+          <div class="card" style="flex: 1; padding: 8px">
+            <div style="color: #9fb2c8; font-size: 12px; margin-bottom: 6px">输入</div>
+            <div id="inputPanel" class="log"></div>
+          </div>
+          <div class="card" style="flex: 1; padding: 8px">
+            <div style="color: #9fb2c8; font-size: 12px; margin-bottom: 6px">输出对齐</div>
+            <div id="outputPanel" class="log"></div>
+          </div>
+        </div>
+        <canvas id="dpCanvas" width="900" height="520"></canvas>
+      </section>
+    </main>
+    <footer class="app-footer">
+      <div>说明：该演示展示 DP 矩阵的填充与回溯过程，动态高亮更新单元与路径。</div>
+    </footer>
+    <script type="module">
+      import * as DPCore from './core.js'
+      window.DPCore = DPCore
+    </script>
+    <script defer src="./app.js"></script>
+  </body>
 </html>

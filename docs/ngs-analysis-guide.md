@@ -211,7 +211,7 @@ flowchart TB
   - **samtools**：SAM/BAM/CRAM 转换、排序、索引、基本指标。
   - **Picard MarkDuplicates / GATK MarkDuplicatesSpark**：PCR/光学重复标记；Spark 版并行更快。
   - **GATK BaseRecalibrator / ApplyBQSR**：利用 `dbSNP`、`Mills`、`1000G indels` 对系统性质量偏差建模与重校正。
-  - **mosdepth / Qualimap / Picard Collect*Metrics**：覆盖度、插入片段、比对/靶向捕获指标。
+  - **mosdepth / Qualimap / Picard Collect\*Metrics**：覆盖度、插入片段、比对/靶向捕获指标。
 - **胚系变异**
   - **GATK HaplotypeCaller**：局部组装的 SNP/Indel 调用；`-ERC GVCF` 适合后续联合定型。
   - **GATK GenotypeGVCFs / GLnexus**：多样本联合定型生成队列 VCF。

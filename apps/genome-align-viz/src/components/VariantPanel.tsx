@@ -20,12 +20,17 @@ export default function VariantPanel({ variants }: { variants: VariantItem[] }) 
       <div className="space-y-1 text-sm max-h-36 overflow-auto">
         {variants.length === 0 && <div className="text-neutral-500">暂无</div>}
         {variants.map((v, i) => (
-          <button key={i} className="flex items-center justify-between w-full text-left hover:bg-neutral-800/60 px-2 py-1 rounded" onClick={() => centerOn(v.pos)}>
-            <div className="text-neutral-200">{v.chrom}:{v.pos.toLocaleString()}</div>
+          <button
+            key={i}
+            className="flex items-center justify-between w-full text-left hover:bg-neutral-800/60 px-2 py-1 rounded"
+            onClick={() => centerOn(v.pos)}
+          >
+            <div className="text-neutral-200">
+              {v.chrom}:{v.pos.toLocaleString()}
+            </div>
             <div className="text-neutral-400">{v.type}</div>
             <div className="text-neutral-300">
-              <span className="text-red-300 mr-1">{v.ref}</span>
-              →
+              <span className="text-red-300 mr-1">{v.ref}</span>→
               <span className="text-green-300 ml-1">{v.alt}</span>
             </div>
             <div className="text-neutral-400">DP {v.dp}</div>

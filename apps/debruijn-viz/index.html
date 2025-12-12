@@ -1,50 +1,54 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>de Bruijn 图组装演示</title>
-  <link rel="stylesheet" href="./styles.css" />
-</head>
-<body>
-  <header class="app-header">
-    <div class="brand">de Bruijn 图构建与压缩</div>
-    <div class="sub">k-mer 分解、图构建、路径压缩与 Euler 路动画</div>
-  </header>
-  <main class="container">
-    <section class="controls-panel">
-      <div class="panel-section">
-        <label class="field"><span>参考序列：</span><input id="refSeq" type="text" value="ATGATGAC" /></label>
-      </div>
-      <div class="panel-section">
-        <label class="field"><span>k 值：</span><input id="kVal" type="number" min="2" max="10" value="3" /></label>
-      </div>
-      <div class="panel-section row">
-        <button id="buildBtn" class="btn primary">构建</button>
-        <button id="playBtn" class="btn">播放 Euler 路</button>
-        <button id="resetBtn" class="btn danger">重置</button>
-      </div>
-      <div class="panel-section">
-        <div class="log" id="logPanel"></div>
-      </div>
-    </section>
-    <section class="viz-panel">
-      <div class="row" style="gap:12px; align-items:flex-start; margin-bottom:10px;">
-        <div class="card" style="flex:1; padding:8px;">
-          <div style="color:#9fb2c8; font-size:12px; margin-bottom:6px;">k-mer 列表</div>
-          <div id="kmerPanel" class="log"></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>de Bruijn 图组装演示</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">de Bruijn 图构建与压缩</div>
+      <div class="sub">k-mer 分解、图构建、路径压缩与 Euler 路动画</div>
+    </header>
+    <main class="container">
+      <section class="controls-panel">
+        <div class="panel-section">
+          <label class="field"
+            ><span>参考序列：</span><input id="refSeq" type="text" value="ATGATGAC"
+          /></label>
         </div>
-        <div class="card" style="flex:1; padding:8px;">
-          <div style="color:#9fb2c8; font-size:12px; margin-bottom:6px;">构建结果</div>
-          <div id="buildPanel" class="log"></div>
+        <div class="panel-section">
+          <label class="field"
+            ><span>k 值：</span><input id="kVal" type="number" min="2" max="10" value="3"
+          /></label>
         </div>
-      </div>
-      <canvas id="graphCanvas" width="900" height="520"></canvas>
-    </section>
-  </main>
-  <footer class="app-footer">
-    <div>说明：演示 de Bruijn 图的节点为 (k-1)-mer，边为 k-mer，Euler 路动画展示重建序列。</div>
-  </footer>
-  <script defer src="./app.js"></script>
-</body>
+        <div class="panel-section row">
+          <button id="buildBtn" class="btn primary">构建</button>
+          <button id="playBtn" class="btn">播放 Euler 路</button>
+          <button id="resetBtn" class="btn danger">重置</button>
+        </div>
+        <div class="panel-section">
+          <div class="log" id="logPanel"></div>
+        </div>
+      </section>
+      <section class="viz-panel">
+        <div class="row" style="gap: 12px; align-items: flex-start; margin-bottom: 10px">
+          <div class="card" style="flex: 1; padding: 8px">
+            <div style="color: #9fb2c8; font-size: 12px; margin-bottom: 6px">k-mer 列表</div>
+            <div id="kmerPanel" class="log"></div>
+          </div>
+          <div class="card" style="flex: 1; padding: 8px">
+            <div style="color: #9fb2c8; font-size: 12px; margin-bottom: 6px">构建结果</div>
+            <div id="buildPanel" class="log"></div>
+          </div>
+        </div>
+        <canvas id="graphCanvas" width="900" height="520"></canvas>
+      </section>
+    </main>
+    <footer class="app-footer">
+      <div>说明：演示 de Bruijn 图的节点为 (k-1)-mer，边为 k-mer，Euler 路动画展示重建序列。</div>
+    </footer>
+    <script defer src="./app.js"></script>
+  </body>
 </html>

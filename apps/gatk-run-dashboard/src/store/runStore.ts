@@ -5,7 +5,11 @@ import { fetchCromwellMetadata, normalizeCromwell } from '../adapters/cromwell'
 export type RunStatus = 'Queued' | 'Running' | 'Succeeded' | 'Failed' | 'Aborted'
 export type Phase = 'Preprocess' | 'VariantCalling' | 'JointGenotyping' | 'Filtering'
 
-export interface Edge { from: string; to: string; label?: string }
+export interface Edge {
+  from: string
+  to: string
+  label?: string
+}
 export interface Step {
   id: string
   label: string
@@ -30,7 +34,13 @@ export interface Run {
   createdAt: string
   updatedAt?: string
   status: RunStatus
-  stats?: { totalSteps: number; succeeded: number; failed: number; running: number; durationMs?: number }
+  stats?: {
+    totalSteps: number
+    succeeded: number
+    failed: number
+    running: number
+    durationMs?: number
+  }
   steps: Step[]
   edges: Edge[]
 }
@@ -98,7 +108,10 @@ export const useRunStore = create<RunState>((set, get) => ({
     set(() => ({ loading: true, error: null }))
     try {
       const { authEnabled, authHeaderKey, authHeaderValue } = get()
-      const headers = authEnabled && authHeaderKey ? { [authHeaderKey]: authHeaderValue } as Record<string, string> : undefined
+      const headers =
+        authEnabled && authHeaderKey
+          ? ({ [authHeaderKey]: authHeaderValue } as Record<string, string>)
+          : undefined
       const meta = await fetchCromwellMetadata(baseUrl, workflowId, headers)
       const run = normalizeCromwell(meta)
       set(() => ({ run, loading: false, lastCromwell: { baseUrl, workflowId } }))
@@ -117,7 +130,10 @@ export const useRunStore = create<RunState>((set, get) => ({
     if (!last) return
     try {
       const { authEnabled, authHeaderKey, authHeaderValue } = get()
-      const headers = authEnabled && authHeaderKey ? { [authHeaderKey]: authHeaderValue } as Record<string, string> : undefined
+      const headers =
+        authEnabled && authHeaderKey
+          ? ({ [authHeaderKey]: authHeaderValue } as Record<string, string>)
+          : undefined
       const meta = await fetchCromwellMetadata(last.baseUrl, last.workflowId, headers)
       const run = normalizeCromwell(meta)
       set(() => ({ run }))
@@ -131,5 +147,8 @@ export const useRunStore = create<RunState>((set, get) => ({
   setAuthHeaderKey: (k) => set(() => ({ authHeaderKey: k })),
   setAuthHeaderValue: (v) => set(() => ({ authHeaderValue: v })),
   setTimelineExporter: (fn) => set(() => ({ timelineExporter: fn })),
-  timelineExport: () => { const fn = get().timelineExporter; if (fn) fn() },
+  timelineExport: () => {
+    const fn = get().timelineExporter
+    if (fn) fn()
+  },
 }))

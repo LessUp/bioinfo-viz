@@ -1,24 +1,32 @@
-import type { Metric, Pipeline, PipelineProfile, ResourceLink, RunStatus, Sample, Stage } from '@/types/pipeline';
-import { ROUTES } from '@/lib/routes';
+import type {
+  Metric,
+  Pipeline,
+  PipelineProfile,
+  ResourceLink,
+  RunStatus,
+  Sample,
+  Stage,
+} from '@/types/pipeline'
+import { ROUTES } from '@/lib/routes'
 
 interface StageTemplate extends Omit<Stage, 'startedAt' | 'finishedAt'> {
   /** seconds ago */
-  startedAgo?: number;
+  startedAgo?: number
   /** seconds ago */
-  finishedAgo?: number;
-  estimatedDurationSec?: number;
+  finishedAgo?: number
+  estimatedDurationSec?: number
 }
 
 export interface PipelineTemplate {
-  id: string;
-  project: string;
-  status: RunStatus;
-  profile: PipelineProfile;
-  summary: string;
-  highlights: string[];
-  resources: ResourceLink[];
-  defaultSamples: Sample[];
-  stageTemplates: StageTemplate[];
+  id: string
+  project: string
+  status: RunStatus
+  profile: PipelineProfile
+  summary: string
+  highlights: string[]
+  resources: ResourceLink[]
+  defaultSamples: Sample[]
+  stageTemplates: StageTemplate[]
 }
 
 const DEFAULT_SAMPLES: Sample[] = [
@@ -28,7 +36,7 @@ const DEFAULT_SAMPLES: Sample[] = [
   { id: 'S4', name: 'S4' },
   { id: 'S5', name: 'S5' },
   { id: 'S6', name: 'S6' },
-];
+]
 
 const wesResources: ResourceLink[] = [
   {
@@ -43,7 +51,7 @@ const wesResources: ResourceLink[] = [
     href: ROUTES.apps.bwaAlgorithmViz,
     kind: 'app',
   },
-];
+]
 
 const rnaResources: ResourceLink[] = [
   {
@@ -58,7 +66,7 @@ const rnaResources: ResourceLink[] = [
     href: ROUTES.apps.gatkRunDashboard,
     kind: 'app',
   },
-];
+]
 
 const scResources: ResourceLink[] = [
   {
@@ -73,21 +81,21 @@ const scResources: ResourceLink[] = [
     href: ROUTES.apps.genomeAlignViz,
     kind: 'app',
   },
-];
+]
 
 function makeStage(
   data: Omit<StageTemplate, 'startedAgo' | 'finishedAgo' | 'estimatedDurationSec'> & {
-    startedAgo: number;
-    finishedAgo?: number;
-    estimatedDurationSec?: number;
-  },
+    startedAgo: number
+    finishedAgo?: number
+    estimatedDurationSec?: number
+  }
 ): StageTemplate {
   return {
     ...data,
     startedAgo: data.startedAgo,
     finishedAgo: data.finishedAgo,
     estimatedDurationSec: data.estimatedDurationSec,
-  };
+  }
 }
 
 const wesStages: StageTemplate[] = [
@@ -98,10 +106,7 @@ const wesStages: StageTemplate[] = [
     status: 'succeeded',
     startedAgo: 3600,
     finishedAgo: 3500,
-    metrics: [
-      metric('samples', '样本数', 6),
-      metric('total_reads_m', '总读数', 120.3, 'M'),
-    ],
+    metrics: [metric('samples', '样本数', 6), metric('total_reads_m', '总读数', 120.3, 'M')],
     artifacts: [],
     logs: [{ ts: isoAgo(3550), level: 'info', message: '上传完成' }],
   }),
@@ -116,7 +121,9 @@ const wesStages: StageTemplate[] = [
       metric('q30_rate_avg', 'Q30 平均', 92.4, '%'),
       metric('gc_content_avg', 'GC 平均', 48.1, '%'),
     ],
-    artifacts: [{ id: 'fastqc', name: 'fastqc_report.html', type: 'report', url: '/files/fastqc.html' }],
+    artifacts: [
+      { id: 'fastqc', name: 'fastqc_report.html', type: 'report', url: '/files/fastqc.html' },
+    ],
     logs: [],
   }),
   makeStage({
@@ -177,10 +184,7 @@ const wesStages: StageTemplate[] = [
     status: 'succeeded',
     startedAgo: 2199,
     finishedAgo: 2000,
-    metrics: [
-      metric('clinvar_pathogenic', 'ClinVar 致病', 12),
-      metric('lof', 'LoF 变异', 35),
-    ],
+    metrics: [metric('clinvar_pathogenic', 'ClinVar 致病', 12), metric('lof', 'LoF 变异', 35)],
     artifacts: [{ id: 'ann', name: 'annotated.vcf.gz', type: 'vcf', url: '#' }],
     logs: [],
   }),
@@ -206,7 +210,7 @@ const wesStages: StageTemplate[] = [
     artifacts: [],
     logs: [],
   }),
-];
+]
 
 const rnaStages: StageTemplate[] = [
   makeStage({
@@ -216,10 +220,7 @@ const rnaStages: StageTemplate[] = [
     status: 'succeeded',
     startedAgo: 4200,
     finishedAgo: 4100,
-    metrics: [
-      metric('samples', '样本数', 12),
-      metric('total_reads_m', '总读数', 480.5, 'M'),
-    ],
+    metrics: [metric('samples', '样本数', 12), metric('total_reads_m', '总读数', 480.5, 'M')],
     artifacts: [],
     logs: [],
   }),
@@ -272,10 +273,7 @@ const rnaStages: StageTemplate[] = [
     status: 'succeeded',
     startedAgo: 2899,
     finishedAgo: 2700,
-    metrics: [
-      metric('median_tpm', '中位 TPM', 12.5),
-      metric('dispersion', '离散度', 0.34),
-    ],
+    metrics: [metric('median_tpm', '中位 TPM', 12.5), metric('dispersion', '离散度', 0.34)],
     artifacts: [],
     logs: [],
   }),
@@ -286,10 +284,7 @@ const rnaStages: StageTemplate[] = [
     status: 'running',
     startedAgo: 2699,
     estimatedDurationSec: 600,
-    metrics: [
-      metric('deg_found', '已发现差异基因', 842),
-      metric('progress', '进度', 55, '%'),
-    ],
+    metrics: [metric('deg_found', '已发现差异基因', 842), metric('progress', '进度', 55, '%')],
     artifacts: [],
     logs: [],
   }),
@@ -313,7 +308,7 @@ const rnaStages: StageTemplate[] = [
     artifacts: [],
     logs: [],
   }),
-];
+]
 
 const scStages: StageTemplate[] = [
   makeStage({
@@ -323,10 +318,7 @@ const scStages: StageTemplate[] = [
     status: 'succeeded',
     startedAgo: 5400,
     finishedAgo: 5300,
-    metrics: [
-      metric('samples', '样本数', 4),
-      metric('total_cells', '总细胞数', 128000),
-    ],
+    metrics: [metric('samples', '样本数', 4), metric('total_cells', '总细胞数', 128000)],
     artifacts: [],
     logs: [],
   }),
@@ -351,10 +343,7 @@ const scStages: StageTemplate[] = [
     status: 'succeeded',
     startedAgo: 4999,
     finishedAgo: 4700,
-    metrics: [
-      metric('umi_depth', 'UMI 深度', 4250),
-      metric('highly_variable', '高变基因', 3000),
-    ],
+    metrics: [metric('umi_depth', 'UMI 深度', 4250), metric('highly_variable', '高变基因', 3000)],
     artifacts: [],
     logs: [],
   }),
@@ -365,10 +354,7 @@ const scStages: StageTemplate[] = [
     status: 'succeeded',
     startedAgo: 4699,
     finishedAgo: 4500,
-    metrics: [
-      metric('pca_components', 'PCA 组件', 50),
-      metric('umap_neighbors', 'UMAP 邻居', 15),
-    ],
+    metrics: [metric('pca_components', 'PCA 组件', 50), metric('umap_neighbors', 'UMAP 邻居', 15)],
     artifacts: [{ id: 'embedding', name: 'umap.json', type: 'json', url: '#' }],
     logs: [],
   }),
@@ -379,10 +365,7 @@ const scStages: StageTemplate[] = [
     status: 'running',
     startedAgo: 4499,
     estimatedDurationSec: 900,
-    metrics: [
-      metric('clusters', '已识别聚类', 14),
-      metric('progress', '进度', 72, '%'),
-    ],
+    metrics: [metric('clusters', '已识别聚类', 14), metric('progress', '进度', 72, '%')],
     artifacts: [],
     logs: [],
   }),
@@ -416,7 +399,7 @@ const scStages: StageTemplate[] = [
     artifacts: [],
     logs: [],
   }),
-];
+]
 
 export const pipelineTemplates: PipelineTemplate[] = [
   {
@@ -452,7 +435,11 @@ export const pipelineTemplates: PipelineTemplate[] = [
     summary: '通过多样本转录组项目展示如何追踪定量、差异分析以及后续富集步骤的可视化指标。',
     highlights: ['实时掌握表达矩阵质量', '差异表达进度可视化', '可拓展到时序分析'],
     resources: rnaResources,
-    defaultSamples: DEFAULT_SAMPLES.map((s, idx) => ({ ...s, id: `T${idx + 1}`, name: `Tumor_${idx + 1}` })),
+    defaultSamples: DEFAULT_SAMPLES.map((s, idx) => ({
+      ...s,
+      id: `T${idx + 1}`,
+      name: `Tumor_${idx + 1}`,
+    })),
     stageTemplates: rnaStages,
   },
   {
@@ -478,42 +465,47 @@ export const pipelineTemplates: PipelineTemplate[] = [
     ],
     stageTemplates: scStages,
   },
-];
+]
 
 function isoAgo(seconds: number): string {
-  return new Date(Date.now() - seconds * 1000).toISOString();
+  return new Date(Date.now() - seconds * 1000).toISOString()
 }
 
 function metric(key: string, label: string, value: number | string, unit?: string): Metric {
-  return { key, label, value, unit };
+  return { key, label, value, unit }
 }
 
-function materializeStage({ startedAgo, finishedAgo, estimatedDurationSec, ...rest }: StageTemplate): Stage {
+function materializeStage({
+  startedAgo,
+  finishedAgo,
+  estimatedDurationSec,
+  ...rest
+}: StageTemplate): Stage {
   const stage: Stage = {
     ...rest,
     metrics: rest.metrics.map((m) => ({ ...m })),
     artifacts: rest.artifacts.map((a) => ({ ...a })),
     logs: rest.logs.map((l) => ({ ...l })),
-  };
+  }
   if (startedAgo) {
-    stage.startedAt = isoAgo(startedAgo);
+    stage.startedAt = isoAgo(startedAgo)
   }
   if (finishedAgo) {
-    stage.finishedAt = isoAgo(finishedAgo);
+    stage.finishedAt = isoAgo(finishedAgo)
   }
   if (stage.startedAt && stage.finishedAt && !rest.durationSec) {
-    stage.durationSec = Math.max(0, startedAgo! - finishedAgo!);
+    stage.durationSec = Math.max(0, startedAgo! - finishedAgo!)
   } else if (rest.durationSec) {
-    stage.durationSec = rest.durationSec;
+    stage.durationSec = rest.durationSec
   } else if (estimatedDurationSec) {
-    stage.durationSec = estimatedDurationSec;
+    stage.durationSec = estimatedDurationSec
   }
-  return stage;
+  return stage
 }
 
 export function buildPipelineRun(id: string): Pipeline | undefined {
-  const template = pipelineTemplates.find((p) => p.id === id);
-  if (!template) return undefined;
+  const template = pipelineTemplates.find((p) => p.id === id)
+  if (!template) return undefined
   return {
     id: template.id,
     project: template.project,
@@ -524,7 +516,7 @@ export function buildPipelineRun(id: string): Pipeline | undefined {
     summary: template.summary,
     highlights: template.highlights,
     resources: template.resources,
-  } as Pipeline;
+  } as Pipeline
 }
 
 export function listPipelinePreviews() {
@@ -536,5 +528,5 @@ export function listPipelinePreviews() {
     difficulty: p.profile.difficulty,
     category: p.profile.category,
     keyConcepts: p.profile.keyConcepts,
-  }));
+  }))
 }

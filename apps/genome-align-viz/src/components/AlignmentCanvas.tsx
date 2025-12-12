@@ -17,13 +17,26 @@ function useResize(elRef: React.RefObject<HTMLElement>) {
   return size
 }
 
-export default function AlignmentCanvas({ region, reads, filters, variants = [] }: { region: { chrom: string; start: number; end: number }; reads: ReadAlignment[]; filters: { minMapq: number; showMismatches: boolean; showIndels: boolean; showVariants?: boolean }; variants?: VariantItem[] }) {
+export default function AlignmentCanvas({
+  region,
+  reads,
+  filters,
+  variants = [],
+}: {
+  region: { chrom: string; start: number; end: number }
+  reads: ReadAlignment[]
+  filters: { minMapq: number; showMismatches: boolean; showIndels: boolean; showVariants?: boolean }
+  variants?: VariantItem[]
+}) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { w, h } = useResize(wrapRef)
   const [hover, setHover] = useState<{ x: number; y: number; r?: ReadAlignment } | null>(null)
 
-  const filteredReads = useMemo(() => reads.filter(r => r.mapq >= filters.minMapq), [reads, filters.minMapq])
+  const filteredReads = useMemo(
+    () => reads.filter((r) => r.mapq >= filters.minMapq),
+    [reads, filters.minMapq]
+  )
 
   const displayReads = useMemo(() => {
     if (w <= 0) return filteredReads
@@ -47,10 +60,17 @@ export default function AlignmentCanvas({ region, reads, filters, variants = [] 
       const rEnd = r.pos + len
       let assigned = 0
       for (let l = 0; l < ends.length; l++) {
-        if (r.pos >= ends[l] + 3) { assigned = l; ends[l] = rEnd; break }
+        if (r.pos >= ends[l] + 3) {
+          assigned = l
+          ends[l] = rEnd
+          break
+        }
         if (l === ends.length - 1) assigned = ends.length
       }
-      if (ends.length === 0 || r.pos < ends[assigned] + 3) { ends.push(rEnd); assigned = ends.length - 1 }
+      if (ends.length === 0 || r.pos < ends[assigned] + 3) {
+        ends.push(rEnd)
+        assigned = ends.length - 1
+      }
       laneIndex[i] = assigned
     }
     return { sorted, laneIndex, laneCount: ends.length }
@@ -72,7 +92,7 @@ export default function AlignmentCanvas({ region, reads, filters, variants = [] 
     ctx.fillRect(0, 0, w, h)
 
     const span = region.end - region.start
-    const xScale = (pos: number) => (pos - region.start) / span * w
+    const xScale = (pos: number) => ((pos - region.start) / span) * w
 
     // reference axis
     ctx.strokeStyle = '#374151'
@@ -120,7 +140,7 @@ export default function AlignmentCanvas({ region, reads, filters, variants = [] 
         r.deletions?.forEach((del: { pos: number; len: number }) => {
           const dx1 = xScale(del.pos)
           const dx2 = xScale(del.pos + del.len)
-          ctx.fillRect(dx1, y + laneH/2 - 1, Math.max(1, dx2 - dx1), 2)
+          ctx.fillRect(dx1, y + laneH / 2 - 1, Math.max(1, dx2 - dx1), 2)
         })
       }
     }
@@ -143,8 +163,21 @@ export default function AlignmentCanvas({ region, reads, filters, variants = [] 
     // axes labels
     ctx.fillStyle = '#9ca3af'
     ctx.font = '11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto'
-    ctx.fillText(`${region.chrom}:${region.start.toLocaleString()}-${region.end.toLocaleString()}`, 6, 12)
-  }, [w, h, region, lanes, filters.showMismatches, filters.showIndels, filters.showVariants, variants])
+    ctx.fillText(
+      `${region.chrom}:${region.start.toLocaleString()}-${region.end.toLocaleString()}`,
+      6,
+      12
+    )
+  }, [
+    w,
+    h,
+    region,
+    lanes,
+    filters.showMismatches,
+    filters.showIndels,
+    filters.showVariants,
+    variants,
+  ])
 
   const onMove: React.MouseEventHandler<HTMLCanvasElement> = (e) => {
     const canvas = canvasRef.current
@@ -157,13 +190,19 @@ export default function AlignmentCanvas({ region, reads, filters, variants = [] 
     const laneH = 8
     const gap = 4
     const lane = Math.floor((y - 24) / (laneH + gap))
-    if (lane < 0 || lane >= lanes.laneCount) { setHover({ x, y, r: undefined }); return }
+    if (lane < 0 || lane >= lanes.laneCount) {
+      setHover({ x, y, r: undefined })
+      return
+    }
     let found: ReadAlignment | undefined
     for (let i = 0; i < lanes.sorted.length; i++) {
       if (lanes.laneIndex[i] !== lane) continue
       const r = lanes.sorted[i]
       const len = alignedLengthFromCigar(r.cigar)
-      if (gp >= r.pos && gp <= r.pos + len) { found = r; break }
+      if (gp >= r.pos && gp <= r.pos + len) {
+        found = r
+        break
+      }
     }
     setHover({ x, y, r: found })
   }
@@ -172,12 +211,28 @@ export default function AlignmentCanvas({ region, reads, filters, variants = [] 
 
   return (
     <div ref={wrapRef} className="relative w-full h-60 card p-2">
-      <canvas ref={canvasRef} className="w-full h-full" onMouseMove={onMove} onMouseLeave={onLeave} />
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full"
+        onMouseMove={onMove}
+        onMouseLeave={onLeave}
+      />
       {hover?.r && (
-        <div className="absolute bg-neutral-900/95 border border-neutral-700 rounded px-2 py-1 text-xs text-neutral-200 pointer-events-none" style={{ left: Math.min(hover.x + 12, Math.max(0, (w || 0) - 160)), top: Math.min(hover.y + 12, Math.max(0, (h || 0) - 80)) }}>
-          <div>pos {hover.r.pos.toLocaleString()} · MAPQ {hover.r.mapq}</div>
+        <div
+          className="absolute bg-neutral-900/95 border border-neutral-700 rounded px-2 py-1 text-xs text-neutral-200 pointer-events-none"
+          style={{
+            left: Math.min(hover.x + 12, Math.max(0, (w || 0) - 160)),
+            top: Math.min(hover.y + 12, Math.max(0, (h || 0) - 80)),
+          }}
+        >
+          <div>
+            pos {hover.r.pos.toLocaleString()} · MAPQ {hover.r.mapq}
+          </div>
           <div>cigar {hover.r.cigar}</div>
-          <div>mm {(hover.r.mismatches?.length ?? 0)} · ins {(hover.r.insertions?.length ?? 0)} · del {(hover.r.deletions?.length ?? 0)}</div>
+          <div>
+            mm {hover.r.mismatches?.length ?? 0} · ins {hover.r.insertions?.length ?? 0} · del{' '}
+            {hover.r.deletions?.length ?? 0}
+          </div>
         </div>
       )}
     </div>

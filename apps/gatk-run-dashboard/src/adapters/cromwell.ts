@@ -29,7 +29,11 @@ function phaseOf(label: string): Phase {
   return 'Preprocess'
 }
 
-export async function fetchCromwellMetadata(baseUrl: string, workflowId: string, headers?: Record<string, string>) {
+export async function fetchCromwellMetadata(
+  baseUrl: string,
+  workflowId: string,
+  headers?: Record<string, string>
+) {
   const url = `${baseUrl.replace(/\/$/, '')}/api/workflows/v1/${workflowId}/metadata?expandSubWorkflows=true`
   const res = await fetch(url, { headers })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -41,18 +45,22 @@ export function normalizeCromwell(meta: any): Run {
   const steps: Step[] = []
 
   Object.entries(calls).forEach(([callName, attempts]) => {
-    (attempts || []).forEach((a: any) => {
+    ;(attempts || []).forEach((a: any) => {
       const id = `${callName}${typeof a.shardIndex === 'number' ? `#${a.shardIndex}` : ''}${a.attempt ? `@${a.attempt}` : ''}`
       const label = callName.split('.').slice(-1)[0]
       const start = a.start || undefined
       const end = a.end || undefined
-      const dur = start && end ? (Date.parse(end) - Date.parse(start)) : undefined
+      const dur = start && end ? Date.parse(end) - Date.parse(start) : undefined
       steps.push({
         id,
         label,
         fqname: callName,
         phase: phaseOf(label),
-        status: mapStatus(a.executionStatus || a.executionStatusDescription || (a.callCaching?.hit ? 'Succeeded' : meta.status)),
+        status: mapStatus(
+          a.executionStatus ||
+            a.executionStatusDescription ||
+            (a.callCaching?.hit ? 'Succeeded' : meta.status)
+        ),
         startTime: start,
         endTime: end,
         attempt: a.attempt,
@@ -86,7 +94,7 @@ export function normalizeCromwell(meta: any): Run {
 }
 
 function inferGermlineEdges(steps: Step[]): Edge[] {
-  const find = (nameLike: RegExp) => steps.find(s => nameLike.test(s.label))?.id
+  const find = (nameLike: RegExp) => steps.find((s) => nameLike.test(s.label))?.id
   const chain: Array<[RegExp, RegExp]> = [
     [/bwa|mem/i, /markdup|markduplicates/i],
     [/markdup|markduplicates/i, /bqsr|recalibrator/i],

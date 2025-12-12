@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from 'next/link'
 
 const APP_CONFIG: Record<string, { title: string; description: string; commands: string[] }> = {
   'picard-workflow-spa': {
@@ -44,10 +44,10 @@ const APP_CONFIG: Record<string, { title: string; description: string; commands:
     description: '展示对齐片段、覆盖度、变异和日志的实时可视化。',
     commands: ['在仓库根目录运行：', 'npm run dev:align', '默认端口：5173（预览 5174）'],
   },
-};
+}
 
 export default function AppBridgePage({ params }: { params: { slug: string } }) {
-  const config = APP_CONFIG[params.slug];
+  const config = APP_CONFIG[params.slug]
 
   if (!config) {
     return (
@@ -65,13 +65,15 @@ export default function AppBridgePage({ params }: { params: { slug: string } }) 
           </Link>
         </div>
       </main>
-    );
+    )
   }
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{config.title}</h1>
-      <p className="mt-4 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">{config.description}</p>
+      <p className="mt-4 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
+        {config.description}
+      </p>
       <section className="mt-6 space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
         <p>在本地启动该子应用的推荐步骤：</p>
         <div className="rounded-lg bg-zinc-100 p-3 font-mono text-xs text-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
@@ -92,5 +94,5 @@ export default function AppBridgePage({ params }: { params: { slug: string } }) 
         </Link>
       </div>
     </main>
-  );
+  )
 }

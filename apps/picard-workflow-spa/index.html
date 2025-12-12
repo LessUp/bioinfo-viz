@@ -1,214 +1,471 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Picard 分析流程可视化</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
-</head>
-<body class="min-h-screen bg-slate-50 text-slate-800">
-  <div class="max-w-7xl mx-auto p-6" x-data="picardApp()" x-init="init()" x-effect="$nextTick(() => { if (window.hljs) { hljs.highlightAll() } }); saveState()">
-    <header class="mb-6">
-      <h1 class="text-3xl font-bold tracking-tight">Picard 分析流程可视化</h1>
-      <p class="text-slate-600 mt-1">切换 WGS/WES/RNA 流程，点击流程图节点查看步骤说明与命令示例。</p>
-    </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Picard 分析流程可视化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
+  </head>
+  <body class="min-h-screen bg-slate-50 text-slate-800">
+    <div
+      class="max-w-7xl mx-auto p-6"
+      x-data="picardApp()"
+      x-init="init()"
+      x-effect="$nextTick(() => { if (window.hljs) { hljs.highlightAll() } }); saveState()"
+    >
+      <header class="mb-6">
+        <h1 class="text-3xl font-bold tracking-tight">Picard 分析流程可视化</h1>
+        <p class="text-slate-600 mt-1">
+          切换 WGS/WES/RNA 流程，点击流程图节点查看步骤说明与命令示例。
+        </p>
+      </header>
 
-    <div class="flex flex-col lg:flex-row gap-6">
-      <main class="lg:w-2/3 space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <button @click="setWorkflow('wgs')" :class="workflow === 'wgs' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'" class="px-3 py-1.5 rounded border shadow-sm hover:shadow">WGS</button>
-            <button @click="setWorkflow('wes')" :class="workflow === 'wes' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'" class="px-3 py-1.5 rounded border shadow-sm hover:shadow">WES</button>
-            <button @click="setWorkflow('rna')" :class="workflow === 'rna' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'" class="px-3 py-1.5 rounded border shadow-sm hover:shadow">RNA</button>
-          </div>
-          <div class="flex items-center gap-2">
-            <button @click="copyFullScript('sh')" :disabled="!canExport()" :class="{'opacity-50 cursor-not-allowed': !canExport()}" class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700">复制全流程</button>
-            <button @click="exportScript('sh')" :disabled="!canExport()" :class="{'opacity-50 cursor-not-allowed': !canExport()}" class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700">导出脚本(.sh)</button>
-            <button @click="exportScript('cmd')" :disabled="!canExport()" :class="{'opacity-50 cursor-not-allowed': !canExport()}" class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700">导出脚本(.cmd)</button>
-            <button @click="exportScript('ps1')" :disabled="!canExport()" :class="{'opacity-50 cursor-not-allowed': !canExport()}" class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700">导出脚本(.ps1)</button>
-            <button @click="exportSVG()" class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700">导出SVG</button>
-            <button @click="exportPNG()" class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700">导出PNG</button>
-            <button @click="exportConfig()" class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700">导出配置(.json)</button>
-            <button @click="triggerImportConfig()" class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700">导入配置(.json)</button>
-            <input type="file" accept="application/json" class="hidden" x-ref="importFile" @change="onImportConfigFileChange">
-          </div>
-        </div>
-
-        <div class="rounded-lg bg-white shadow border p-4">
-          <div class="w-full overflow-auto" x-ref="graph" style="min-height:360px"></div>
-        </div>
-        <div class="text-sm text-slate-500">说明：带虚线的“比对”步骤通常由 BWA/STAR 等完成，不属于 Picard 工具本身。</div>
-      </main>
-
-      <aside class="lg:w-1/3">
-        <div class="rounded-lg bg-white shadow border mb-4">
-          <div class="p-4 border-b">
-            <div class="text-sm text-slate-500">参数配置</div>
-            <div class="text-xl font-semibold">命令占位符</div>
-          </div>
-          <div class="p-4 space-y-3">
-            <div class="flex items-center gap-3">
-              <label class="text-sm">命令前缀
-                <select x-model="runner" class="mt-1 border rounded px-2 py-1">
-                  <template x-for="opt in runnerOptions" :key="opt">
-                    <option :value="opt" x-text="opt"></option>
-                  </template>
-                </select>
-              </label>
-              <label class="text-sm inline-flex items-center gap-2 mt-6">
-                <input type="checkbox" x-model="quoteValues" class="border rounded">
-                为值加引号
-              </label>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <label class="text-sm">REFERENCE
-                <input x-model="params.REFERENCE" class="mt-1 w-full border rounded px-2 py-1" placeholder="reference.fasta">
-              </label>
-              <label class="text-sm">DICT_OUT
-                <input x-model="params.DICT_OUT" class="mt-1 w-full border rounded px-2 py-1" placeholder="reference.dict">
-              </label>
-              <label class="text-sm">ALIGNED_BAM
-                <input x-model="params.ALIGNED_BAM" class="mt-1 w-full border rounded px-2 py-1" placeholder="aligned.bam">
-              </label>
-              <label class="text-sm">RG_BAM
-                <input x-model="params.RG_BAM" class="mt-1 w-full border rounded px-2 py-1" placeholder="rg.bam">
-              </label>
-              <label class="text-sm">SORTED_BAM
-                <input x-model="params.SORTED_BAM" class="mt-1 w-full border rounded px-2 py-1" placeholder="sorted.bam">
-              </label>
-              <label class="text-sm">DEDUP_BAM
-                <input x-model="params.DEDUP_BAM" class="mt-1 w-full border rounded px-2 py-1" placeholder="dedup.bam">
-              </label>
-              <label class="text-sm">DEDUP_METRICS
-                <input x-model="params.DEDUP_METRICS" class="mt-1 w-full border rounded px-2 py-1" placeholder="dedup.metrics.txt">
-              </label>
-              <label class="text-sm">ALIGN_SUMMARY
-                <input x-model="params.ALIGN_SUMMARY" class="mt-1 w-full border rounded px-2 py-1" placeholder="alignment.summary.txt">
-              </label>
-              <label class="text-sm">WGS_METRICS
-                <input x-model="params.WGS_METRICS" class="mt-1 w-full border rounded px-2 py-1" placeholder="wgs.metrics.txt">
-              </label>
-              <label class="text-sm">GC_BIAS_TXT
-                <input x-model="params.GC_BIAS_TXT" class="mt-1 w-full border rounded px-2 py-1" placeholder="gc_bias.txt">
-              </label>
-              <label class="text-sm">GC_BIAS_PDF
-                <input x-model="params.GC_BIAS_PDF" class="mt-1 w-full border rounded px-2 py-1" placeholder="gc_bias.pdf">
-              </label>
-              <label class="text-sm">GC_SUMMARY
-                <input x-model="params.GC_SUMMARY" class="mt-1 w-full border rounded px-2 py-1" placeholder="gc_summary.txt">
-              </label>
-              <label class="text-sm">INSERT_METRICS
-                <input x-model="params.INSERT_METRICS" class="mt-1 w-full border rounded px-2 py-1" placeholder="insert_size_metrics.txt">
-              </label>
-              <label class="text-sm">INSERT_HIST
-                <input x-model="params.INSERT_HIST" class="mt-1 w-full border rounded px-2 py-1" placeholder="insert_size_histogram.pdf">
-              </label>
-              <label class="text-sm">HS_METRICS
-                <input x-model="params.HS_METRICS" class="mt-1 w-full border rounded px-2 py-1" placeholder="hs.metrics.txt">
-              </label>
-              <label class="text-sm">BAIT_INTERVALS
-                <input x-model="params.BAIT_INTERVALS" class="mt-1 w-full border rounded px-2 py-1" placeholder="baits.interval_list">
-              </label>
-              <label class="text-sm">TARGET_INTERVALS
-                <input x-model="params.TARGET_INTERVALS" class="mt-1 w-full border rounded px-2 py-1" placeholder="targets.interval_list">
-              </label>
-              <label class="text-sm">RNA_METRICS
-                <input x-model="params.RNA_METRICS" class="mt-1 w-full border rounded px-2 py-1" placeholder="rna.metrics.txt">
-              </label>
-              <label class="text-sm">REF_FLAT
-                <input x-model="params.REF_FLAT" class="mt-1 w-full border rounded px-2 py-1" placeholder="ref.flat">
-              </label>
-              <label class="text-sm">RRNA_INTERVALS
-                <input x-model="params.RRNA_INTERVALS" class="mt-1 w-full border rounded px-2 py-1" placeholder="rRNA.interval_list">
-              </label>
-              <label class="text-sm">RGID
-                <input x-model="params.RGID" class="mt-1 w-full border rounded px-2 py-1" placeholder="sample">
-              </label>
-              <label class="text-sm">RGLB
-                <input x-model="params.RGLB" class="mt-1 w-full border rounded px-2 py-1" placeholder="lib1">
-              </label>
-              <label class="text-sm">RGPL
-                <input x-model="params.RGPL" class="mt-1 w-full border rounded px-2 py-1" placeholder="ILLUMINA">
-              </label>
-              <label class="text-sm">RGPU
-                <input x-model="params.RGPU" class="mt-1 w-full border rounded px-2 py-1" placeholder="unit1">
-              </label>
-              <label class="text-sm">RGSM
-                <input x-model="params.RGSM" class="mt-1 w-full border rounded px-2 py-1" placeholder="sample">
-              </label>
+      <div class="flex flex-col lg:flex-row gap-6">
+        <main class="lg:w-2/3 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <button
+                @click="setWorkflow('wgs')"
+                :class="workflow === 'wgs' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow"
+              >
+                WGS
+              </button>
+              <button
+                @click="setWorkflow('wes')"
+                :class="workflow === 'wes' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow"
+              >
+                WES
+              </button>
+              <button
+                @click="setWorkflow('rna')"
+                :class="workflow === 'rna' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow"
+              >
+                RNA
+              </button>
             </div>
             <div class="flex items-center gap-2">
-              <button class="px-3 py-1.5 rounded border shadow-sm bg-white hover:shadow" @click="resetParams()">重置参数</button>
+              <button
+                @click="copyFullScript('sh')"
+                :disabled="!canExport()"
+                :class="{'opacity-50 cursor-not-allowed': !canExport()}"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700"
+              >
+                复制全流程
+              </button>
+              <button
+                @click="exportScript('sh')"
+                :disabled="!canExport()"
+                :class="{'opacity-50 cursor-not-allowed': !canExport()}"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700"
+              >
+                导出脚本(.sh)
+              </button>
+              <button
+                @click="exportScript('cmd')"
+                :disabled="!canExport()"
+                :class="{'opacity-50 cursor-not-allowed': !canExport()}"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700"
+              >
+                导出脚本(.cmd)
+              </button>
+              <button
+                @click="exportScript('ps1')"
+                :disabled="!canExport()"
+                :class="{'opacity-50 cursor-not-allowed': !canExport()}"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700"
+              >
+                导出脚本(.ps1)
+              </button>
+              <button
+                @click="exportSVG()"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700"
+              >
+                导出SVG
+              </button>
+              <button
+                @click="exportPNG()"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700"
+              >
+                导出PNG
+              </button>
+              <button
+                @click="exportConfig()"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700"
+              >
+                导出配置(.json)
+              </button>
+              <button
+                @click="triggerImportConfig()"
+                class="px-3 py-1.5 rounded border shadow-sm hover:shadow bg-white text-slate-700"
+              >
+                导入配置(.json)
+              </button>
+              <input
+                type="file"
+                accept="application/json"
+                class="hidden"
+                x-ref="importFile"
+                @change="onImportConfigFileChange"
+              />
             </div>
           </div>
-        </div>
-        <div class="rounded-lg bg-white shadow border mb-4">
-          <div class="p-4 border-b flex items-center justify-between">
-            <div>
-              <div class="text-sm text-slate-500">步骤选择</div>
-              <div class="text-xl font-semibold">包含在脚本中</div>
-            </div>
-            <div class="text-sm text-slate-500" x-text="`已选 ${selectedCount()} / ${totalCount()}`"></div>
+
+          <div class="rounded-lg bg-white shadow border p-4">
+            <div class="w-full overflow-auto" x-ref="graph" style="min-height: 360px"></div>
           </div>
-          <div class="p-3">
-            <div class="flex items-center gap-2 mb-2">
-              <button class="px-2 py-1 text-xs rounded border bg-white hover:shadow" @click="setAllIncluded(true)">全选</button>
-              <button class="px-2 py-1 text-xs rounded border bg-white hover:shadow" @click="setAllIncluded(false)">全不选</button>
+          <div class="text-sm text-slate-500">
+            说明：带虚线的“比对”步骤通常由 BWA/STAR 等完成，不属于 Picard 工具本身。
+          </div>
+        </main>
+
+        <aside class="lg:w-1/3">
+          <div class="rounded-lg bg-white shadow border mb-4">
+            <div class="p-4 border-b">
+              <div class="text-sm text-slate-500">参数配置</div>
+              <div class="text-xl font-semibold">命令占位符</div>
             </div>
-            <div class="max-h-56 overflow-auto pr-2 space-y-1">
-              <template x-for="id in (workflows[workflow].order || Object.keys(workflows[workflow].steps))" :key="id">
-                <label class="flex items-center gap-2 text-sm">
-                  <input type="checkbox" :value="id" :checked="included[id] !== false" @change="onIncludeChanged(id, $event.target.checked)">
-                  <span class="truncate" x-text="workflows[workflow].steps[id]?.title || id"></span>
+            <div class="p-4 space-y-3">
+              <div class="flex items-center gap-3">
+                <label class="text-sm"
+                  >命令前缀
+                  <select x-model="runner" class="mt-1 border rounded px-2 py-1">
+                    <template x-for="opt in runnerOptions" :key="opt">
+                      <option :value="opt" x-text="opt"></option>
+                    </template>
+                  </select>
                 </label>
+                <label class="text-sm inline-flex items-center gap-2 mt-6">
+                  <input type="checkbox" x-model="quoteValues" class="border rounded" />
+                  为值加引号
+                </label>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <label class="text-sm"
+                  >REFERENCE
+                  <input
+                    x-model="params.REFERENCE"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="reference.fasta"
+                  />
+                </label>
+                <label class="text-sm"
+                  >DICT_OUT
+                  <input
+                    x-model="params.DICT_OUT"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="reference.dict"
+                  />
+                </label>
+                <label class="text-sm"
+                  >ALIGNED_BAM
+                  <input
+                    x-model="params.ALIGNED_BAM"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="aligned.bam"
+                  />
+                </label>
+                <label class="text-sm"
+                  >RG_BAM
+                  <input
+                    x-model="params.RG_BAM"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="rg.bam"
+                  />
+                </label>
+                <label class="text-sm"
+                  >SORTED_BAM
+                  <input
+                    x-model="params.SORTED_BAM"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="sorted.bam"
+                  />
+                </label>
+                <label class="text-sm"
+                  >DEDUP_BAM
+                  <input
+                    x-model="params.DEDUP_BAM"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="dedup.bam"
+                  />
+                </label>
+                <label class="text-sm"
+                  >DEDUP_METRICS
+                  <input
+                    x-model="params.DEDUP_METRICS"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="dedup.metrics.txt"
+                  />
+                </label>
+                <label class="text-sm"
+                  >ALIGN_SUMMARY
+                  <input
+                    x-model="params.ALIGN_SUMMARY"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="alignment.summary.txt"
+                  />
+                </label>
+                <label class="text-sm"
+                  >WGS_METRICS
+                  <input
+                    x-model="params.WGS_METRICS"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="wgs.metrics.txt"
+                  />
+                </label>
+                <label class="text-sm"
+                  >GC_BIAS_TXT
+                  <input
+                    x-model="params.GC_BIAS_TXT"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="gc_bias.txt"
+                  />
+                </label>
+                <label class="text-sm"
+                  >GC_BIAS_PDF
+                  <input
+                    x-model="params.GC_BIAS_PDF"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="gc_bias.pdf"
+                  />
+                </label>
+                <label class="text-sm"
+                  >GC_SUMMARY
+                  <input
+                    x-model="params.GC_SUMMARY"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="gc_summary.txt"
+                  />
+                </label>
+                <label class="text-sm"
+                  >INSERT_METRICS
+                  <input
+                    x-model="params.INSERT_METRICS"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="insert_size_metrics.txt"
+                  />
+                </label>
+                <label class="text-sm"
+                  >INSERT_HIST
+                  <input
+                    x-model="params.INSERT_HIST"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="insert_size_histogram.pdf"
+                  />
+                </label>
+                <label class="text-sm"
+                  >HS_METRICS
+                  <input
+                    x-model="params.HS_METRICS"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="hs.metrics.txt"
+                  />
+                </label>
+                <label class="text-sm"
+                  >BAIT_INTERVALS
+                  <input
+                    x-model="params.BAIT_INTERVALS"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="baits.interval_list"
+                  />
+                </label>
+                <label class="text-sm"
+                  >TARGET_INTERVALS
+                  <input
+                    x-model="params.TARGET_INTERVALS"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="targets.interval_list"
+                  />
+                </label>
+                <label class="text-sm"
+                  >RNA_METRICS
+                  <input
+                    x-model="params.RNA_METRICS"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="rna.metrics.txt"
+                  />
+                </label>
+                <label class="text-sm"
+                  >REF_FLAT
+                  <input
+                    x-model="params.REF_FLAT"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="ref.flat"
+                  />
+                </label>
+                <label class="text-sm"
+                  >RRNA_INTERVALS
+                  <input
+                    x-model="params.RRNA_INTERVALS"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="rRNA.interval_list"
+                  />
+                </label>
+                <label class="text-sm"
+                  >RGID
+                  <input
+                    x-model="params.RGID"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="sample"
+                  />
+                </label>
+                <label class="text-sm"
+                  >RGLB
+                  <input
+                    x-model="params.RGLB"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="lib1"
+                  />
+                </label>
+                <label class="text-sm"
+                  >RGPL
+                  <input
+                    x-model="params.RGPL"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="ILLUMINA"
+                  />
+                </label>
+                <label class="text-sm"
+                  >RGPU
+                  <input
+                    x-model="params.RGPU"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="unit1"
+                  />
+                </label>
+                <label class="text-sm"
+                  >RGSM
+                  <input
+                    x-model="params.RGSM"
+                    class="mt-1 w-full border rounded px-2 py-1"
+                    placeholder="sample"
+                  />
+                </label>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  class="px-3 py-1.5 rounded border shadow-sm bg-white hover:shadow"
+                  @click="resetParams()"
+                >
+                  重置参数
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-lg bg-white shadow border mb-4">
+            <div class="p-4 border-b flex items-center justify-between">
+              <div>
+                <div class="text-sm text-slate-500">步骤选择</div>
+                <div class="text-xl font-semibold">包含在脚本中</div>
+              </div>
+              <div
+                class="text-sm text-slate-500"
+                x-text="`已选 ${selectedCount()} / ${totalCount()}`"
+              ></div>
+            </div>
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-2">
+                <button
+                  class="px-2 py-1 text-xs rounded border bg-white hover:shadow"
+                  @click="setAllIncluded(true)"
+                >
+                  全选
+                </button>
+                <button
+                  class="px-2 py-1 text-xs rounded border bg-white hover:shadow"
+                  @click="setAllIncluded(false)"
+                >
+                  全不选
+                </button>
+              </div>
+              <div class="max-h-56 overflow-auto pr-2 space-y-1">
+                <template
+                  x-for="id in (workflows[workflow].order || Object.keys(workflows[workflow].steps))"
+                  :key="id"
+                >
+                  <label class="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      :value="id"
+                      :checked="included[id] !== false"
+                      @change="onIncludeChanged(id, $event.target.checked)"
+                    />
+                    <span
+                      class="truncate"
+                      x-text="workflows[workflow].steps[id]?.title || id"
+                    ></span>
+                  </label>
+                </template>
+              </div>
+            </div>
+          </div>
+          <div class="rounded-lg bg-white shadow border">
+            <div class="p-4 border-b">
+              <div class="text-sm text-slate-500">当前步骤</div>
+              <div
+                class="text-xl font-semibold"
+                x-text="currentStep ? currentStep.title : '请选择流程图中的步骤'"
+              ></div>
+            </div>
+            <div class="p-4 space-y-4">
+              <div>
+                <div class="font-medium text-slate-700 mb-1">步骤简介</div>
+                <div
+                  class="text-sm text-slate-600"
+                  x-text="currentStep ? currentStep.desc : '在左侧流程图中点击任一步骤以查看详情。'"
+                ></div>
+              </div>
+
+              <template x-if="currentStep && currentStep.command">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="font-medium text-slate-700">命令示例</div>
+                    <button
+                      class="text-xs px-2 py-1 rounded border hover:bg-slate-50"
+                      @click="copyCommands(formatCommand(currentStep.command))"
+                    >
+                      复制命令
+                    </button>
+                  </div>
+                  <pre
+                    class="overflow-auto max-h-96"
+                  ><code class="language-bash" x-text="formatCommand(currentStep.command)"></code></pre>
+                  <div class="mt-2 text-xs" x-show="missingParams(currentStep.command).length">
+                    <span class="text-amber-600">缺少参数：</span>
+                    <span
+                      class="text-amber-700"
+                      x-text="missingParams(currentStep.command).join(', ')"
+                    ></span>
+                  </div>
+                </div>
               </template>
             </div>
           </div>
-        </div>
-        <div class="rounded-lg bg-white shadow border">
-          <div class="p-4 border-b">
-            <div class="text-sm text-slate-500">当前步骤</div>
-            <div class="text-xl font-semibold" x-text="currentStep ? currentStep.title : '请选择流程图中的步骤'"></div>
+          <div class="mt-4 text-sm text-slate-500">
+            提示：将命令中的输入输出路径与样本信息替换为你的实际文件后执行。
           </div>
-          <div class="p-4 space-y-4">
-            <div>
-              <div class="font-medium text-slate-700 mb-1">步骤简介</div>
-              <div class="text-sm text-slate-600" x-text="currentStep ? currentStep.desc : '在左侧流程图中点击任一步骤以查看详情。'"></div>
-            </div>
-
-            <template x-if="currentStep && currentStep.command">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <div class="font-medium text-slate-700">命令示例</div>
-                  <button class="text-xs px-2 py-1 rounded border hover:bg-slate-50" @click="copyCommands(formatCommand(currentStep.command))">复制命令</button>
-                </div>
-                <pre class="overflow-auto max-h-96"><code class="language-bash" x-text="formatCommand(currentStep.command)"></code></pre>
-                <div class="mt-2 text-xs" x-show="missingParams(currentStep.command).length">
-                  <span class="text-amber-600">缺少参数：</span>
-                  <span class="text-amber-700" x-text="missingParams(currentStep.command).join(', ')"></span>
-                </div>
-              </div>
-            </template>
-          </div>
-        </div>
-        <div class="mt-4 text-sm text-slate-500">提示：将命令中的输入输出路径与样本信息替换为你的实际文件后执行。</div>
-      </aside>
+        </aside>
+      </div>
     </div>
-  </div>
 
-  <script>
-    function picardApp() {
-      return {
-        workflow: 'wgs',
-        currentStepId: null,
-        workflows: {
-          wgs: {
-            name: 'WGS',
-            graph: `
+    <script>
+      function picardApp() {
+        return {
+          workflow: 'wgs',
+          currentStepId: null,
+          workflows: {
+            wgs: {
+              name: 'WGS',
+              graph: `
               flowchart TD
                 DICT[CreateSequenceDictionary]:::pic
                 MAP[比对（外部）]:::ext
@@ -242,72 +499,72 @@
                 click GC call onNodeClick
                 click INS call onNodeClick
             `,
-            order: ['DICT','RG','SS','MD','BI','VAL','ASM','WGS','GC','INS'],
-            steps: {
-              DICT: {
-                title: 'CreateSequenceDictionary',
-                desc: '为参考基因组生成 .dict 文件，供 Picard/GATK 使用。',
-                command: `picard CreateSequenceDictionary R=\${REFERENCE} O=\${DICT_OUT}`
-              },
-              RG: {
-                title: 'AddOrReplaceReadGroups',
-                desc: '补充或规范 BAM 的 Read Group 信息。',
-                command: `picard AddOrReplaceReadGroups \\
+              order: ['DICT', 'RG', 'SS', 'MD', 'BI', 'VAL', 'ASM', 'WGS', 'GC', 'INS'],
+              steps: {
+                DICT: {
+                  title: 'CreateSequenceDictionary',
+                  desc: '为参考基因组生成 .dict 文件，供 Picard/GATK 使用。',
+                  command: `picard CreateSequenceDictionary R=\${REFERENCE} O=\${DICT_OUT}`,
+                },
+                RG: {
+                  title: 'AddOrReplaceReadGroups',
+                  desc: '补充或规范 BAM 的 Read Group 信息。',
+                  command: `picard AddOrReplaceReadGroups \\
   I=\${ALIGNED_BAM} O=\${RG_BAM} \\
-  RGID=\${RGID} RGLB=\${RGLB} RGPL=\${RGPL} RGPU=\${RGPU} RGSM=\${RGSM}`
-              },
-              SS: {
-                title: 'SortSam',
-                desc: '按坐标排序 BAM。',
-                command: `picard SortSam I=\${RG_BAM} O=\${SORTED_BAM} SORT_ORDER=coordinate`
-              },
-              MD: {
-                title: 'MarkDuplicates',
-                desc: '标记 PCR/光学重复并生成重复指标。',
-                command: `picard MarkDuplicates \\
+  RGID=\${RGID} RGLB=\${RGLB} RGPL=\${RGPL} RGPU=\${RGPU} RGSM=\${RGSM}`,
+                },
+                SS: {
+                  title: 'SortSam',
+                  desc: '按坐标排序 BAM。',
+                  command: `picard SortSam I=\${RG_BAM} O=\${SORTED_BAM} SORT_ORDER=coordinate`,
+                },
+                MD: {
+                  title: 'MarkDuplicates',
+                  desc: '标记 PCR/光学重复并生成重复指标。',
+                  command: `picard MarkDuplicates \\
   I=\${SORTED_BAM} O=\${DEDUP_BAM} M=\${DEDUP_METRICS} \\
-  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT`
-              },
-              BI: {
-                title: 'BuildBamIndex',
-                desc: '为 BAM 构建 .bai 索引。',
-                command: `picard BuildBamIndex I=\${DEDUP_BAM}`
-              },
-              VAL: {
-                title: 'ValidateSamFile',
-                desc: '检查 BAM 的一致性与潜在问题。',
-                command: `picard ValidateSamFile I=\${DEDUP_BAM} MODE=SUMMARY`
-              },
-              ASM: {
-                title: 'CollectAlignmentSummaryMetrics',
-                desc: '对齐统计指标（比对率、错配率等）。',
-                command: `picard CollectAlignmentSummaryMetrics \\
-  R=\${REFERENCE} I=\${DEDUP_BAM} O=\${ALIGN_SUMMARY}`
-              },
-              WGS: {
-                title: 'CollectWgsMetrics',
-                desc: 'WGS 覆盖度与质量指标。',
-                command: `picard CollectWgsMetrics \\
-  R=\${REFERENCE} I=\${DEDUP_BAM} O=\${WGS_METRICS}`
-              },
-              GC: {
-                title: 'CollectGcBiasMetrics',
-                desc: 'GC 偏好性指标与图表。',
-                command: `picard CollectGcBiasMetrics \\
+  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT`,
+                },
+                BI: {
+                  title: 'BuildBamIndex',
+                  desc: '为 BAM 构建 .bai 索引。',
+                  command: `picard BuildBamIndex I=\${DEDUP_BAM}`,
+                },
+                VAL: {
+                  title: 'ValidateSamFile',
+                  desc: '检查 BAM 的一致性与潜在问题。',
+                  command: `picard ValidateSamFile I=\${DEDUP_BAM} MODE=SUMMARY`,
+                },
+                ASM: {
+                  title: 'CollectAlignmentSummaryMetrics',
+                  desc: '对齐统计指标（比对率、错配率等）。',
+                  command: `picard CollectAlignmentSummaryMetrics \\
+  R=\${REFERENCE} I=\${DEDUP_BAM} O=\${ALIGN_SUMMARY}`,
+                },
+                WGS: {
+                  title: 'CollectWgsMetrics',
+                  desc: 'WGS 覆盖度与质量指标。',
+                  command: `picard CollectWgsMetrics \\
+  R=\${REFERENCE} I=\${DEDUP_BAM} O=\${WGS_METRICS}`,
+                },
+                GC: {
+                  title: 'CollectGcBiasMetrics',
+                  desc: 'GC 偏好性指标与图表。',
+                  command: `picard CollectGcBiasMetrics \\
   I=\${DEDUP_BAM} O=\${GC_BIAS_TXT} CHART=\${GC_BIAS_PDF} S=\${GC_SUMMARY} \\
-  R=\${REFERENCE}`
+  R=\${REFERENCE}`,
+                },
+                INS: {
+                  title: 'CollectInsertSizeMetrics',
+                  desc: '插入片段分布与直方图。',
+                  command: `picard CollectInsertSizeMetrics \\
+  I=\${DEDUP_BAM} O=\${INSERT_METRICS} H=\${INSERT_HIST} M=0.5`,
+                },
               },
-              INS: {
-                title: 'CollectInsertSizeMetrics',
-                desc: '插入片段分布与直方图。',
-                command: `picard CollectInsertSizeMetrics \\
-  I=\${DEDUP_BAM} O=\${INSERT_METRICS} H=\${INSERT_HIST} M=0.5`
-              }
-            }
-          },
-          wes: {
-            name: 'WES',
-            graph: `
+            },
+            wes: {
+              name: 'WES',
+              graph: `
               flowchart TD
                 DICT[CreateSequenceDictionary]:::pic
                 MAP[比对（外部）]:::ext
@@ -341,73 +598,73 @@
                 click GC call onNodeClick
                 click INS call onNodeClick
             `,
-            order: ['DICT','RG','SS','MD','BI','VAL','ASM','HSM','GC','INS'],
-            steps: {
-              DICT: {
-                title: 'CreateSequenceDictionary',
-                desc: '为参考基因组生成 .dict 文件。',
-                command: `picard CreateSequenceDictionary R=\${REFERENCE} O=\${DICT_OUT}`
-              },
-              RG: {
-                title: 'AddOrReplaceReadGroups',
-                desc: '补充或规范 BAM 的 Read Group 信息。',
-                command: `picard AddOrReplaceReadGroups \\
+              order: ['DICT', 'RG', 'SS', 'MD', 'BI', 'VAL', 'ASM', 'HSM', 'GC', 'INS'],
+              steps: {
+                DICT: {
+                  title: 'CreateSequenceDictionary',
+                  desc: '为参考基因组生成 .dict 文件。',
+                  command: `picard CreateSequenceDictionary R=\${REFERENCE} O=\${DICT_OUT}`,
+                },
+                RG: {
+                  title: 'AddOrReplaceReadGroups',
+                  desc: '补充或规范 BAM 的 Read Group 信息。',
+                  command: `picard AddOrReplaceReadGroups \\
   I=\${ALIGNED_BAM} O=\${RG_BAM} \\
-  RGID=\${RGID} RGLB=\${RGLB} RGPL=\${RGPL} RGPU=\${RGPU} RGSM=\${RGSM}`
-              },
-              SS: {
-                title: 'SortSam',
-                desc: '按坐标排序 BAM。',
-                command: `picard SortSam I=\${RG_BAM} O=\${SORTED_BAM} SORT_ORDER=coordinate`
-              },
-              MD: {
-                title: 'MarkDuplicates',
-                desc: '标记重复并生成指标。',
-                command: `picard MarkDuplicates \\
+  RGID=\${RGID} RGLB=\${RGLB} RGPL=\${RGPL} RGPU=\${RGPU} RGSM=\${RGSM}`,
+                },
+                SS: {
+                  title: 'SortSam',
+                  desc: '按坐标排序 BAM。',
+                  command: `picard SortSam I=\${RG_BAM} O=\${SORTED_BAM} SORT_ORDER=coordinate`,
+                },
+                MD: {
+                  title: 'MarkDuplicates',
+                  desc: '标记重复并生成指标。',
+                  command: `picard MarkDuplicates \\
   I=\${SORTED_BAM} O=\${DEDUP_BAM} M=\${DEDUP_METRICS} \\
-  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT`
-              },
-              BI: {
-                title: 'BuildBamIndex',
-                desc: '为 BAM 构建 .bai 索引。',
-                command: `picard BuildBamIndex I=\${DEDUP_BAM}`
-              },
-              VAL: {
-                title: 'ValidateSamFile',
-                desc: '检查 BAM 的一致性与潜在问题。',
-                command: `picard ValidateSamFile I=\${DEDUP_BAM} MODE=SUMMARY`
-              },
-              ASM: {
-                title: 'CollectAlignmentSummaryMetrics',
-                desc: '对齐统计指标。',
-                command: `picard CollectAlignmentSummaryMetrics \\
-  R=\${REFERENCE} I=\${DEDUP_BAM} O=\${ALIGN_SUMMARY}`
-              },
-              HSM: {
-                title: 'CollectHsMetrics',
-                desc: '外显子捕获效率等指标，需要 baits/targets 区域列表。',
-                command: `picard CollectHsMetrics \\
+  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT`,
+                },
+                BI: {
+                  title: 'BuildBamIndex',
+                  desc: '为 BAM 构建 .bai 索引。',
+                  command: `picard BuildBamIndex I=\${DEDUP_BAM}`,
+                },
+                VAL: {
+                  title: 'ValidateSamFile',
+                  desc: '检查 BAM 的一致性与潜在问题。',
+                  command: `picard ValidateSamFile I=\${DEDUP_BAM} MODE=SUMMARY`,
+                },
+                ASM: {
+                  title: 'CollectAlignmentSummaryMetrics',
+                  desc: '对齐统计指标。',
+                  command: `picard CollectAlignmentSummaryMetrics \\
+  R=\${REFERENCE} I=\${DEDUP_BAM} O=\${ALIGN_SUMMARY}`,
+                },
+                HSM: {
+                  title: 'CollectHsMetrics',
+                  desc: '外显子捕获效率等指标，需要 baits/targets 区域列表。',
+                  command: `picard CollectHsMetrics \\
   I=\${DEDUP_BAM} O=\${HS_METRICS} R=\${REFERENCE} \\
-  BAIT_INTERVALS=\${BAIT_INTERVALS} TARGET_INTERVALS=\${TARGET_INTERVALS}`
-              },
-              GC: {
-                title: 'CollectGcBiasMetrics',
-                desc: 'GC 偏好性指标与图表。',
-                command: `picard CollectGcBiasMetrics \\
+  BAIT_INTERVALS=\${BAIT_INTERVALS} TARGET_INTERVALS=\${TARGET_INTERVALS}`,
+                },
+                GC: {
+                  title: 'CollectGcBiasMetrics',
+                  desc: 'GC 偏好性指标与图表。',
+                  command: `picard CollectGcBiasMetrics \\
   I=\${DEDUP_BAM} O=\${GC_BIAS_TXT} CHART=\${GC_BIAS_PDF} S=\${GC_SUMMARY} \\
-  R=\${REFERENCE}`
+  R=\${REFERENCE}`,
+                },
+                INS: {
+                  title: 'CollectInsertSizeMetrics',
+                  desc: '插入片段分布与直方图。',
+                  command: `picard CollectInsertSizeMetrics \\
+  I=\${DEDUP_BAM} O=\${INSERT_METRICS} H=\${INSERT_HIST} M=0.5`,
+                },
               },
-              INS: {
-                title: 'CollectInsertSizeMetrics',
-                desc: '插入片段分布与直方图。',
-                command: `picard CollectInsertSizeMetrics \\
-  I=\${DEDUP_BAM} O=\${INSERT_METRICS} H=\${INSERT_HIST} M=0.5`
-              }
-            }
-          },
-          rna: {
-            name: 'RNA',
-            graph: `
+            },
+            rna: {
+              name: 'RNA',
+              graph: `
               flowchart TD
                 DICT[CreateSequenceDictionary]:::pic
                 MAP[比对（外部）]:::ext
@@ -438,391 +695,435 @@
                 click RNAM call onNodeClick
                 click INS call onNodeClick
             `,
-            order: ['DICT','RG','SS','MD','BI','VAL','ASM','RNAM','INS'],
-            steps: {
-              DICT: {
-                title: 'CreateSequenceDictionary',
-                desc: '为参考基因组生成 .dict 文件。',
-                command: `picard CreateSequenceDictionary R=\${REFERENCE} O=\${DICT_OUT}`
-              },
-              RG: {
-                title: 'AddOrReplaceReadGroups',
-                desc: '补充或规范 BAM 的 Read Group 信息。',
-                command: `picard AddOrReplaceReadGroups \\
+              order: ['DICT', 'RG', 'SS', 'MD', 'BI', 'VAL', 'ASM', 'RNAM', 'INS'],
+              steps: {
+                DICT: {
+                  title: 'CreateSequenceDictionary',
+                  desc: '为参考基因组生成 .dict 文件。',
+                  command: `picard CreateSequenceDictionary R=\${REFERENCE} O=\${DICT_OUT}`,
+                },
+                RG: {
+                  title: 'AddOrReplaceReadGroups',
+                  desc: '补充或规范 BAM 的 Read Group 信息。',
+                  command: `picard AddOrReplaceReadGroups \\
   I=\${ALIGNED_BAM} O=\${RG_BAM} \\
-  RGID=\${RGID} RGLB=\${RGLB} RGPL=\${RGPL} RGPU=\${RGPU} RGSM=\${RGSM}`
-              },
-              SS: {
-                title: 'SortSam',
-                desc: '按坐标排序 BAM。',
-                command: `picard SortSam I=\${RG_BAM} O=\${SORTED_BAM} SORT_ORDER=coordinate`
-              },
-              MD: {
-                title: 'MarkDuplicates',
-                desc: '标记重复并生成指标。',
-                command: `picard MarkDuplicates \\
+  RGID=\${RGID} RGLB=\${RGLB} RGPL=\${RGPL} RGPU=\${RGPU} RGSM=\${RGSM}`,
+                },
+                SS: {
+                  title: 'SortSam',
+                  desc: '按坐标排序 BAM。',
+                  command: `picard SortSam I=\${RG_BAM} O=\${SORTED_BAM} SORT_ORDER=coordinate`,
+                },
+                MD: {
+                  title: 'MarkDuplicates',
+                  desc: '标记重复并生成指标。',
+                  command: `picard MarkDuplicates \\
   I=\${SORTED_BAM} O=\${DEDUP_BAM} M=\${DEDUP_METRICS} \\
-  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT`
-              },
-              BI: {
-                title: 'BuildBamIndex',
-                desc: '为 BAM 构建 .bai 索引。',
-                command: `picard BuildBamIndex I=\${DEDUP_BAM}`
-              },
-              VAL: {
-                title: 'ValidateSamFile',
-                desc: '检查 BAM 的一致性与潜在问题。',
-                command: `picard ValidateSamFile I=\${DEDUP_BAM} MODE=SUMMARY`
-              },
-              ASM: {
-                title: 'CollectAlignmentSummaryMetrics',
-                desc: '对齐统计指标。',
-                command: `picard CollectAlignmentSummaryMetrics \\
-  R=\${REFERENCE} I=\${DEDUP_BAM} O=\${ALIGN_SUMMARY}`
-              },
-              RNAM: {
-                title: 'CollectRnaSeqMetrics',
-                desc: 'RNA-Seq 指标，如内含子/外显子分布、rRNA 比例等。',
-                command: `picard CollectRnaSeqMetrics \\
+  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT`,
+                },
+                BI: {
+                  title: 'BuildBamIndex',
+                  desc: '为 BAM 构建 .bai 索引。',
+                  command: `picard BuildBamIndex I=\${DEDUP_BAM}`,
+                },
+                VAL: {
+                  title: 'ValidateSamFile',
+                  desc: '检查 BAM 的一致性与潜在问题。',
+                  command: `picard ValidateSamFile I=\${DEDUP_BAM} MODE=SUMMARY`,
+                },
+                ASM: {
+                  title: 'CollectAlignmentSummaryMetrics',
+                  desc: '对齐统计指标。',
+                  command: `picard CollectAlignmentSummaryMetrics \\
+  R=\${REFERENCE} I=\${DEDUP_BAM} O=\${ALIGN_SUMMARY}`,
+                },
+                RNAM: {
+                  title: 'CollectRnaSeqMetrics',
+                  desc: 'RNA-Seq 指标，如内含子/外显子分布、rRNA 比例等。',
+                  command: `picard CollectRnaSeqMetrics \\
   I=\${DEDUP_BAM} O=\${RNA_METRICS} \\
   REF_FLAT=\${REF_FLAT} STRAND=NONE \\
-  RIBOSOMAL_INTERVALS=\${RRNA_INTERVALS} MINIMUM_LENGTH=100`
+  RIBOSOMAL_INTERVALS=\${RRNA_INTERVALS} MINIMUM_LENGTH=100`,
+                },
+                INS: {
+                  title: 'CollectInsertSizeMetrics',
+                  desc: '插入片段分布与直方图。',
+                  command: `picard CollectInsertSizeMetrics \\
+  I=\${DEDUP_BAM} O=\${INSERT_METRICS} H=\${INSERT_HIST} M=0.5`,
+                },
               },
-              INS: {
-                title: 'CollectInsertSizeMetrics',
-                desc: '插入片段分布与直方图。',
-                command: `picard CollectInsertSizeMetrics \\
-  I=\${DEDUP_BAM} O=\${INSERT_METRICS} H=\${INSERT_HIST} M=0.5`
+            },
+          },
+          get currentStep() {
+            const wf = this.workflows[this.workflow]
+            return this.currentStepId ? wf.steps[this.currentStepId] || null : null
+          },
+          async init() {
+            mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: 'default' })
+            window.onNodeClick = (id) => {
+              this.selectStep(id)
+            }
+            this.params = this.newDefaultParams()
+            const first = Object.keys(this.workflows[this.workflow].steps)[0]
+            this.currentStepId = first
+            await this.loadState()
+            if (!this.included || Object.keys(this.included).length === 0) this.resetIncluded()
+            await this.render()
+            this.$nextTick(() => {
+              if (window.hljs) {
+                hljs.highlightAll()
+              }
+            })
+          },
+          async render() {
+            const def = this.workflows[this.workflow].graph
+            const { svg, bindFunctions } = await mermaid.render('picardFlow', def)
+            this.$refs.graph.innerHTML = svg
+            if (typeof bindFunctions === 'function') {
+              bindFunctions(this.$refs.graph)
+            }
+          },
+          async setWorkflow(key) {
+            if (this.workflow === key) return
+            this.workflow = key
+            const first = Object.keys(this.workflows[this.workflow].steps)[0]
+            this.currentStepId = first
+            this.resetIncluded()
+            await this.render()
+            this.$nextTick(() => {
+              if (window.hljs) {
+                hljs.highlightAll()
+              }
+            })
+          },
+          selectStep(id) {
+            this.currentStepId = id
+            this.$nextTick(() => {
+              if (window.hljs) {
+                hljs.highlightAll()
+              }
+            })
+          },
+          async copyCommands(text) {
+            try {
+              await navigator.clipboard.writeText(text)
+            } catch (e) {}
+          },
+          runner: 'picard',
+          runnerOptions: ['picard', 'java -jar picard.jar', 'gatk'],
+          quoteValues: false,
+          included: {},
+          params: {},
+          saveState() {
+            try {
+              const data = {
+                workflow: this.workflow,
+                runner: this.runner,
+                quoteValues: this.quoteValues,
+                params: this.params,
+                included: this.included,
+              }
+              localStorage.setItem('picardFlowState', JSON.stringify(data))
+            } catch (_) {}
+          },
+          async loadState() {
+            try {
+              const text = localStorage.getItem('picardFlowState')
+              if (!text) return
+              const data = JSON.parse(text)
+              if (data.workflow && this.workflows[data.workflow]) {
+                this.workflow = data.workflow
+              }
+              if (data.runner) this.runner = data.runner
+              if (typeof data.quoteValues === 'boolean') this.quoteValues = data.quoteValues
+              if (data.params && typeof data.params === 'object')
+                this.params = { ...this.params, ...data.params }
+              if (data.included && typeof data.included === 'object') {
+                // 仅保留当前流程的步骤
+                const wf = this.workflows[this.workflow]
+                const order = wf.order || Object.keys(wf.steps)
+                const next = {}
+                for (const id of order) next[id] = data.included[id] !== false
+                this.included = next
+              }
+            } catch (_) {}
+          },
+          newDefaultParams() {
+            return {
+              REFERENCE: 'reference.fasta',
+              DICT_OUT: 'reference.dict',
+              ALIGNED_BAM: 'aligned.bam',
+              RG_BAM: 'rg.bam',
+              SORTED_BAM: 'sorted.bam',
+              DEDUP_BAM: 'dedup.bam',
+              DEDUP_METRICS: 'dedup.metrics.txt',
+              ALIGN_SUMMARY: 'alignment.summary.txt',
+              WGS_METRICS: 'wgs.metrics.txt',
+              GC_BIAS_TXT: 'gc_bias.txt',
+              GC_BIAS_PDF: 'gc_bias.pdf',
+              GC_SUMMARY: 'gc_summary.txt',
+              INSERT_METRICS: 'insert_size_metrics.txt',
+              INSERT_HIST: 'insert_size_histogram.pdf',
+              HS_METRICS: 'hs.metrics.txt',
+              BAIT_INTERVALS: 'baits.interval_list',
+              TARGET_INTERVALS: 'targets.interval_list',
+              RNA_METRICS: 'rna.metrics.txt',
+              REF_FLAT: 'ref.flat',
+              RRNA_INTERVALS: 'rRNA.interval_list',
+              RGID: 'sample',
+              RGLB: 'lib1',
+              RGPL: 'ILLUMINA',
+              RGPU: 'unit1',
+              RGSM: 'sample',
+            }
+          },
+          resetParams() {
+            this.params = this.newDefaultParams()
+            this.$nextTick(() => {
+              if (window.hljs) {
+                hljs.highlightAll()
+              }
+            })
+          },
+          formatCommand(cmd) {
+            if (!cmd) return ''
+            let out = cmd
+            for (const [k, v] of Object.entries(this.params)) {
+              const re = new RegExp(
+                '(?:\\\\)?\\$\\{' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\}',
+                'g'
+              )
+              let val = String(v)
+              if (this.quoteValues) val = this.quoteIfNeeded(val)
+              out = out.replace(re, val)
+            }
+            out = this.applyRunner(out)
+            return out
+          },
+          applyRunner(text) {
+            if (!this.runner || this.runner === 'picard') return text
+            return text.replace(/^picard\s+/gm, this.runner + ' ')
+          },
+          quoteIfNeeded(val) {
+            if (val.startsWith('"') && val.endsWith('"')) return val
+            if (/\s|[(){}\[\];'`!#&^|<>?*]/.test(val)) return '"' + val.replace(/"/g, '\\"') + '"'
+            return val
+          },
+          exportScript(type) {
+            if (!this.canExport()) return
+            const wf = this.workflows[this.workflow]
+            const order = wf.order || Object.keys(wf.steps)
+            let lines = []
+            for (const id of order) {
+              const step = wf.steps[id]
+              if (step && step.command && this.isIncluded(id)) {
+                let cmd = this.formatCommand(step.command)
+                if (type === 'cmd') cmd = this.normalizeForCmd(cmd)
+                if (type === 'ps1') cmd = this.normalizeForPs1(cmd)
+                lines.push(cmd)
               }
             }
-          }
-        },
-        get currentStep() {
-          const wf = this.workflows[this.workflow];
-          return this.currentStepId ? (wf.steps[this.currentStepId] || null) : null;
-        },
-        async init() {
-          mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: 'default' });
-          window.onNodeClick = (id) => { this.selectStep(id); };
-          this.params = this.newDefaultParams();
-          const first = Object.keys(this.workflows[this.workflow].steps)[0];
-          this.currentStepId = first;
-          await this.loadState();
-          if (!this.included || Object.keys(this.included).length === 0) this.resetIncluded();
-          await this.render();
-          this.$nextTick(() => { if (window.hljs) { hljs.highlightAll(); } });
-        },
-        async render() {
-          const def = this.workflows[this.workflow].graph;
-          const { svg, bindFunctions } = await mermaid.render('picardFlow', def);
-          this.$refs.graph.innerHTML = svg;
-          if (typeof bindFunctions === 'function') {
-            bindFunctions(this.$refs.graph);
-          }
-        },
-        async setWorkflow(key) {
-          if (this.workflow === key) return;
-          this.workflow = key;
-          const first = Object.keys(this.workflows[this.workflow].steps)[0];
-          this.currentStepId = first;
-          this.resetIncluded();
-          await this.render();
-          this.$nextTick(() => { if (window.hljs) { hljs.highlightAll(); } });
-        },
-        selectStep(id) {
-          this.currentStepId = id;
-          this.$nextTick(() => { if (window.hljs) { hljs.highlightAll(); } });
-        },
-        async copyCommands(text) {
-          try { await navigator.clipboard.writeText(text); } catch (e) {}
-        },
-        runner: 'picard',
-        runnerOptions: ['picard', 'java -jar picard.jar', 'gatk'],
-        quoteValues: false,
-        included: {},
-        params: {},
-        saveState() {
-          try {
-            const data = { workflow: this.workflow, runner: this.runner, quoteValues: this.quoteValues, params: this.params, included: this.included };
-            localStorage.setItem('picardFlowState', JSON.stringify(data));
-          } catch (_) {}
-        },
-        async loadState() {
-          try {
-            const text = localStorage.getItem('picardFlowState');
-            if (!text) return;
-            const data = JSON.parse(text);
-            if (data.workflow && this.workflows[data.workflow]) {
-              this.workflow = data.workflow;
+            let content = lines.join('\n\n')
+            let filename = `${this.workflow}-picard.${type}`
+            if (type === 'sh') {
+              content = '#!/usr/bin/env bash\nset -euo pipefail\n\n' + content + '\n'
+            } else if (type === 'cmd') {
+              content =
+                '@echo off\r\nREM Generated by Picard Flow\r\n\r\n' +
+                content.replace(/\n/g, '\r\n') +
+                '\r\n'
+            } else if (type === 'ps1') {
+              content =
+                '#requires -Version 5.1\n$ErrorActionPreference = "Stop"\n\n' + content + '\n'
             }
-            if (data.runner) this.runner = data.runner;
-            if (typeof data.quoteValues === 'boolean') this.quoteValues = data.quoteValues;
-            if (data.params && typeof data.params === 'object') this.params = { ...this.params, ...data.params };
-            if (data.included && typeof data.included === 'object') {
-              // 仅保留当前流程的步骤
-              const wf = this.workflows[this.workflow];
-              const order = wf.order || Object.keys(wf.steps);
-              const next = {};
-              for (const id of order) next[id] = data.included[id] !== false;
-              this.included = next;
-            }
-          } catch (_) {}
-        },
-        newDefaultParams() {
-          return {
-            REFERENCE: 'reference.fasta',
-            DICT_OUT: 'reference.dict',
-            ALIGNED_BAM: 'aligned.bam',
-            RG_BAM: 'rg.bam',
-            SORTED_BAM: 'sorted.bam',
-            DEDUP_BAM: 'dedup.bam',
-            DEDUP_METRICS: 'dedup.metrics.txt',
-            ALIGN_SUMMARY: 'alignment.summary.txt',
-            WGS_METRICS: 'wgs.metrics.txt',
-            GC_BIAS_TXT: 'gc_bias.txt',
-            GC_BIAS_PDF: 'gc_bias.pdf',
-            GC_SUMMARY: 'gc_summary.txt',
-            INSERT_METRICS: 'insert_size_metrics.txt',
-            INSERT_HIST: 'insert_size_histogram.pdf',
-            HS_METRICS: 'hs.metrics.txt',
-            BAIT_INTERVALS: 'baits.interval_list',
-            TARGET_INTERVALS: 'targets.interval_list',
-            RNA_METRICS: 'rna.metrics.txt',
-            REF_FLAT: 'ref.flat',
-            RRNA_INTERVALS: 'rRNA.interval_list',
-            RGID: 'sample',
-            RGLB: 'lib1',
-            RGPL: 'ILLUMINA',
-            RGPU: 'unit1',
-            RGSM: 'sample',
-          };
-        },
-        resetParams() {
-          this.params = this.newDefaultParams();
-          this.$nextTick(() => { if (window.hljs) { hljs.highlightAll(); } });
-        },
-        formatCommand(cmd) {
-          if (!cmd) return '';
-          let out = cmd;
-          for (const [k, v] of Object.entries(this.params)) {
-            const re = new RegExp('(?:\\\\)?\\$\\{' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\}', 'g');
-            let val = String(v);
-            if (this.quoteValues) val = this.quoteIfNeeded(val);
-            out = out.replace(re, val);
-          }
-          out = this.applyRunner(out);
-          return out;
-        },
-        applyRunner(text) {
-          if (!this.runner || this.runner === 'picard') return text;
-          return text.replace(/^picard\s+/gm, this.runner + ' ');
-        },
-        quoteIfNeeded(val) {
-          if (val.startsWith('"') && val.endsWith('"')) return val;
-          if (/\s|[(){}\[\];'`!#&^|<>?*]/.test(val)) return '"' + val.replace(/"/g, '\\"') + '"';
-          return val;
-        },
-        exportScript(type) {
-          if (!this.canExport()) return;
-          const wf = this.workflows[this.workflow];
-          const order = wf.order || Object.keys(wf.steps);
-          let lines = [];
-          for (const id of order) {
-            const step = wf.steps[id];
-            if (step && step.command && this.isIncluded(id)) {
-              let cmd = this.formatCommand(step.command);
-              if (type === 'cmd') cmd = this.normalizeForCmd(cmd);
-              if (type === 'ps1') cmd = this.normalizeForPs1(cmd);
-              lines.push(cmd);
-            }
-          }
-          let content = lines.join('\n\n');
-          let filename = `${this.workflow}-picard.${type}`;
-          if (type === 'sh') {
-            content = '#!/usr/bin/env bash\nset -euo pipefail\n\n' + content + '\n';
-          } else if (type === 'cmd') {
-            content = '@echo off\r\nREM Generated by Picard Flow\r\n\r\n' + content.replace(/\n/g, '\r\n') + '\r\n';
-          } else if (type === 'ps1') {
-            content = '#requires -Version 5.1\n$ErrorActionPreference = "Stop"\n\n' + content + '\n';
-          }
-          this.download(filename, content, type === 'sh' ? 'text/x-shellscript' : 'text/plain');
-        },
-        normalizeForCmd(text) {
-          // Join bash continuation lines into single lines for Windows CMD
-          return text.replace(/ \\\r?\n/g, ' ').replace(/\n+/g, '\n');
-        },
-        normalizeForPs1(text) {
-          // PowerShell: prefer one command per line; remove bash continuations
-          return text.replace(/ \\\r?\n/g, ' ').replace(/\n+/g, '\n');
-        },
-        exportSVG() {
-          const svgEl = this.$refs.graph.querySelector('svg');
-          if (!svgEl) return;
-          const svg = svgEl.outerHTML;
-          const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `picard-${this.workflow}.svg`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-        },
-        async exportPNG() {
-          const svgEl = this.$refs.graph.querySelector('svg');
-          if (!svgEl) return;
-          const svgText = svgEl.outerHTML;
-          const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
-          const url = URL.createObjectURL(blob);
-          const img = new Image();
-          const vb = svgEl.viewBox && svgEl.viewBox.baseVal ? svgEl.viewBox.baseVal : null;
-          const width = vb ? vb.width : (svgEl.width && svgEl.width.baseVal ? svgEl.width.baseVal.value : svgEl.clientWidth || 1200);
-          const height = vb ? vb.height : (svgEl.height && svgEl.height.baseVal ? svgEl.height.baseVal.value : svgEl.clientHeight || 600);
-          await new Promise((resolve) => {
-            img.onload = resolve;
-            img.src = url;
-          });
-          const canvas = document.createElement('canvas');
-          canvas.width = Math.ceil(width);
-          canvas.height = Math.ceil(height);
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          URL.revokeObjectURL(url);
-          canvas.toBlob((png) => {
-            if (!png) return;
-            const u = URL.createObjectURL(png);
-            const a = document.createElement('a');
-            a.href = u;
-            a.download = `picard-${this.workflow}.png`;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(u);
-          }, 'image/png');
-        },
-        download(filename, content, mime) {
-          const blob = new Blob([content], { type: mime || 'text/plain' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-        },
-        copyFullScript(type) {
-          if (!this.canExport()) return;
-          const wf = this.workflows[this.workflow];
-          const order = wf.order || Object.keys(wf.steps);
-          let lines = [];
-          for (const id of order) {
-            const step = wf.steps[id];
-            if (step && step.command && this.isIncluded(id)) {
-              let cmd = this.formatCommand(step.command);
-              if (type === 'cmd') cmd = this.normalizeForCmd(cmd);
-              if (type === 'ps1') cmd = this.normalizeForPs1(cmd);
-              lines.push(cmd);
-            }
-          }
-          const content = lines.join('\n\n');
-          navigator.clipboard.writeText(content).catch(() => {});
-        },
-        canExport() {
-          const wf = this.workflows[this.workflow];
-          const order = wf.order || Object.keys(wf.steps);
-          const selected = order.filter((id) => this.isIncluded(id));
-          // 必须至少选择一个步骤
-          if (selected.length === 0) return false;
-          // 任一被选步骤存在缺失参数则禁止
-          for (const id of selected) {
-            const step = wf.steps[id];
-            if (!step || !step.command) continue;
-            if (this.missingParams(step.command).length) return false;
-          }
-          return true;
-        },
-        // Step inclusion helpers
-        resetIncluded() {
-          const wf = this.workflows[this.workflow];
-          const order = wf.order || Object.keys(wf.steps);
-          const next = {};
-          for (const id of order) next[id] = true;
-          this.included = next;
-        },
-        isIncluded(id) {
-          return this.included[id] !== false;
-        },
-        onIncludeChanged(id, checked) {
-          this.included = { ...this.included, [id]: !!checked };
-        },
-        setAllIncluded(val) {
-          const wf = this.workflows[this.workflow];
-          const order = wf.order || Object.keys(wf.steps);
-          const next = { ...this.included };
-          for (const id of order) next[id] = !!val;
-          this.included = next;
-        },
-        selectedCount() {
-          const wf = this.workflows[this.workflow];
-          const order = wf.order || Object.keys(wf.steps);
-          let c = 0;
-          for (const id of order) if (this.isIncluded(id)) c++;
-          return c;
-        },
-        totalCount() {
-          const wf = this.workflows[this.workflow];
-          const order = wf.order || Object.keys(wf.steps);
-          return order.length;
-        },
-        exportConfig() {
-          const cfg = { workflow: this.workflow, params: this.params };
-          this.download('picard-config.json', JSON.stringify(cfg, null, 2), 'application/json');
-        },
-        triggerImportConfig() {
-          this.$refs.importFile && this.$refs.importFile.click();
-        },
-        async onImportConfigFileChange(e) {
-          const file = e.target.files && e.target.files[0];
-          if (!file) return;
-          try {
-            const text = await file.text();
-            const json = JSON.parse(text);
-            if (json && typeof json === 'object') {
-              if (json.params && typeof json.params === 'object') {
-                this.params = { ...this.params, ...json.params };
-              }
-              if (json.workflow && this.workflows[json.workflow]) {
-                await this.setWorkflow(json.workflow);
+            this.download(filename, content, type === 'sh' ? 'text/x-shellscript' : 'text/plain')
+          },
+          normalizeForCmd(text) {
+            // Join bash continuation lines into single lines for Windows CMD
+            return text.replace(/ \\\r?\n/g, ' ').replace(/\n+/g, '\n')
+          },
+          normalizeForPs1(text) {
+            // PowerShell: prefer one command per line; remove bash continuations
+            return text.replace(/ \\\r?\n/g, ' ').replace(/\n+/g, '\n')
+          },
+          exportSVG() {
+            const svgEl = this.$refs.graph.querySelector('svg')
+            if (!svgEl) return
+            const svg = svgEl.outerHTML
+            const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `picard-${this.workflow}.svg`
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            URL.revokeObjectURL(url)
+          },
+          async exportPNG() {
+            const svgEl = this.$refs.graph.querySelector('svg')
+            if (!svgEl) return
+            const svgText = svgEl.outerHTML
+            const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' })
+            const url = URL.createObjectURL(blob)
+            const img = new Image()
+            const vb = svgEl.viewBox && svgEl.viewBox.baseVal ? svgEl.viewBox.baseVal : null
+            const width = vb
+              ? vb.width
+              : svgEl.width && svgEl.width.baseVal
+                ? svgEl.width.baseVal.value
+                : svgEl.clientWidth || 1200
+            const height = vb
+              ? vb.height
+              : svgEl.height && svgEl.height.baseVal
+                ? svgEl.height.baseVal.value
+                : svgEl.clientHeight || 600
+            await new Promise((resolve) => {
+              img.onload = resolve
+              img.src = url
+            })
+            const canvas = document.createElement('canvas')
+            canvas.width = Math.ceil(width)
+            canvas.height = Math.ceil(height)
+            const ctx = canvas.getContext('2d')
+            ctx.fillStyle = '#ffffff'
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+            URL.revokeObjectURL(url)
+            canvas.toBlob((png) => {
+              if (!png) return
+              const u = URL.createObjectURL(png)
+              const a = document.createElement('a')
+              a.href = u
+              a.download = `picard-${this.workflow}.png`
+              document.body.appendChild(a)
+              a.click()
+              a.remove()
+              URL.revokeObjectURL(u)
+            }, 'image/png')
+          },
+          download(filename, content, mime) {
+            const blob = new Blob([content], { type: mime || 'text/plain' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = filename
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            URL.revokeObjectURL(url)
+          },
+          copyFullScript(type) {
+            if (!this.canExport()) return
+            const wf = this.workflows[this.workflow]
+            const order = wf.order || Object.keys(wf.steps)
+            let lines = []
+            for (const id of order) {
+              const step = wf.steps[id]
+              if (step && step.command && this.isIncluded(id)) {
+                let cmd = this.formatCommand(step.command)
+                if (type === 'cmd') cmd = this.normalizeForCmd(cmd)
+                if (type === 'ps1') cmd = this.normalizeForPs1(cmd)
+                lines.push(cmd)
               }
             }
-          } catch (_) { /* ignore */ }
-          e.target.value = '';
-        },
-        missingParams(cmd) {
-          const names = this.parsePlaceholders(cmd);
-          const missing = [];
-          for (const n of names) {
-            const v = this.params[n];
-            if (v === undefined || v === null || String(v).trim() === '') missing.push(n);
-          }
-          return missing;
-        },
-        parsePlaceholders(cmd) {
-          if (!cmd) return [];
-          const set = new Set();
-          const re = /\\?\$\{([A-Z0-9_]+)\}/g;
-          let m;
-          while ((m = re.exec(cmd)) !== null) {
-            set.add(m[1]);
-          }
-          return Array.from(set);
+            const content = lines.join('\n\n')
+            navigator.clipboard.writeText(content).catch(() => {})
+          },
+          canExport() {
+            const wf = this.workflows[this.workflow]
+            const order = wf.order || Object.keys(wf.steps)
+            const selected = order.filter((id) => this.isIncluded(id))
+            // 必须至少选择一个步骤
+            if (selected.length === 0) return false
+            // 任一被选步骤存在缺失参数则禁止
+            for (const id of selected) {
+              const step = wf.steps[id]
+              if (!step || !step.command) continue
+              if (this.missingParams(step.command).length) return false
+            }
+            return true
+          },
+          // Step inclusion helpers
+          resetIncluded() {
+            const wf = this.workflows[this.workflow]
+            const order = wf.order || Object.keys(wf.steps)
+            const next = {}
+            for (const id of order) next[id] = true
+            this.included = next
+          },
+          isIncluded(id) {
+            return this.included[id] !== false
+          },
+          onIncludeChanged(id, checked) {
+            this.included = { ...this.included, [id]: !!checked }
+          },
+          setAllIncluded(val) {
+            const wf = this.workflows[this.workflow]
+            const order = wf.order || Object.keys(wf.steps)
+            const next = { ...this.included }
+            for (const id of order) next[id] = !!val
+            this.included = next
+          },
+          selectedCount() {
+            const wf = this.workflows[this.workflow]
+            const order = wf.order || Object.keys(wf.steps)
+            let c = 0
+            for (const id of order) if (this.isIncluded(id)) c++
+            return c
+          },
+          totalCount() {
+            const wf = this.workflows[this.workflow]
+            const order = wf.order || Object.keys(wf.steps)
+            return order.length
+          },
+          exportConfig() {
+            const cfg = { workflow: this.workflow, params: this.params }
+            this.download('picard-config.json', JSON.stringify(cfg, null, 2), 'application/json')
+          },
+          triggerImportConfig() {
+            this.$refs.importFile && this.$refs.importFile.click()
+          },
+          async onImportConfigFileChange(e) {
+            const file = e.target.files && e.target.files[0]
+            if (!file) return
+            try {
+              const text = await file.text()
+              const json = JSON.parse(text)
+              if (json && typeof json === 'object') {
+                if (json.params && typeof json.params === 'object') {
+                  this.params = { ...this.params, ...json.params }
+                }
+                if (json.workflow && this.workflows[json.workflow]) {
+                  await this.setWorkflow(json.workflow)
+                }
+              }
+            } catch (_) {
+              /* ignore */
+            }
+            e.target.value = ''
+          },
+          missingParams(cmd) {
+            const names = this.parsePlaceholders(cmd)
+            const missing = []
+            for (const n of names) {
+              const v = this.params[n]
+              if (v === undefined || v === null || String(v).trim() === '') missing.push(n)
+            }
+            return missing
+          },
+          parsePlaceholders(cmd) {
+            if (!cmd) return []
+            const set = new Set()
+            const re = /\\?\$\{([A-Z0-9_]+)\}/g
+            let m
+            while ((m = re.exec(cmd)) !== null) {
+              set.add(m[1])
+            }
+            return Array.from(set)
+          },
         }
       }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>

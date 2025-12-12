@@ -47,7 +47,10 @@ interface UIState {
   setTeaching: (p: Partial<TeachingState>) => void
 }
 
-type SetState = (partial: Partial<UIState> | ((state: UIState) => Partial<UIState>), replace?: boolean) => void
+type SetState = (
+  partial: Partial<UIState> | ((state: UIState) => Partial<UIState>),
+  replace?: boolean
+) => void
 type GetState = () => UIState
 
 export const useAppStore = create<UIState>((set: SetState, get: GetState) => ({
@@ -58,22 +61,32 @@ export const useAppStore = create<UIState>((set: SetState, get: GetState) => ({
   step: {},
 
   setRegion: (r: Region) => set({ region: r }),
-  zoom: (factor: number) => set((state: UIState) => {
-    const span = state.region.end - state.region.start
-    const center = state.region.start + span / 2
-    const newSpan = Math.max(50, Math.floor(span * factor))
-    return { region: { ...state.region, start: Math.floor(center - newSpan / 2), end: Math.floor(center + newSpan / 2) } }
-  }),
-  centerOn: (pos: number, span?: number) => set((state: UIState) => {
-    const curSpan = state.region.end - state.region.start
-    const s = Math.max(50, Math.floor(span ?? curSpan))
-    const start = Math.max(0, Math.floor(pos - s / 2))
-    const end = start + s
-    return { region: { ...state.region, start, end } }
-  }),
+  zoom: (factor: number) =>
+    set((state: UIState) => {
+      const span = state.region.end - state.region.start
+      const center = state.region.start + span / 2
+      const newSpan = Math.max(50, Math.floor(span * factor))
+      return {
+        region: {
+          ...state.region,
+          start: Math.floor(center - newSpan / 2),
+          end: Math.floor(center + newSpan / 2),
+        },
+      }
+    }),
+  centerOn: (pos: number, span?: number) =>
+    set((state: UIState) => {
+      const curSpan = state.region.end - state.region.start
+      const s = Math.max(50, Math.floor(span ?? curSpan))
+      const start = Math.max(0, Math.floor(pos - s / 2))
+      const end = start + s
+      return { region: { ...state.region, start, end } }
+    }),
   setFilters: (p: Partial<Filters>) => set((s: UIState) => ({ filters: { ...s.filters, ...p } })),
-  setConnection: (p: Partial<ConnectionState>) => set((s: UIState) => ({ connection: { ...s.connection, ...p } })),
+  setConnection: (p: Partial<ConnectionState>) =>
+    set((s: UIState) => ({ connection: { ...s.connection, ...p } })),
   connect: () => set((s: UIState) => ({ connection: { ...s.connection, connected: true } })),
   disconnect: () => set((s: UIState) => ({ connection: { ...s.connection, connected: false } })),
-  setTeaching: (p: Partial<TeachingState>) => set((s: UIState) => ({ teaching: { ...s.teaching, ...p } })),
+  setTeaching: (p: Partial<TeachingState>) =>
+    set((s: UIState) => ({ teaching: { ...s.teaching, ...p } })),
 }))

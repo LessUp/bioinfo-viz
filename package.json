@@ -2,6 +2,9 @@
   "name": "bioinfo-visualizer",
   "private": true,
   "version": "0.1.0",
+  "engines": {
+    "node": ">=20"
+  },
   "workspaces": [
     "apps/*",
     "slides/*"
@@ -15,10 +18,21 @@
     "dev:gatk": "npm run -w gatk-run-dashboard dev",
     "dev:align": "npm run -w genome-align-viz dev",
     "dev:bioinfo": "npm run -w bioinfo-pipeline-web dev",
-    "format": "npx prettier . -w",
-    "format:check": "npx prettier . -c",
-    "lint:all": "npm run -w bioinfo-pipeline-web lint",
-    "test:all": "npm run -w bioinfo-pipeline-web test && npm run -w gatk-run-dashboard test && npm run -w genome-align-viz test && npm run -w smith-waterman-viz test",
-    "ci": "npm run format:check && npm run lint:all && npm run test:all"
+    "format": "prettier . -w",
+    "format:check": "prettier . -c",
+    "lint:all": "npm run -w bioinfo-pipeline-web lint && npm run -w gatk-run-dashboard lint && npm run -w genome-align-viz lint && npm run -w smith-waterman-viz lint --if-present",
+    "test:all": "npm run -w bioinfo-pipeline-web test --if-present && npm run -w gatk-run-dashboard test --if-present && npm run -w genome-align-viz test --if-present && npm run -w smith-waterman-viz test --if-present",
+    "build:all": "npm run -w bioinfo-pipeline-web build --if-present && npm run -w gatk-run-dashboard build --if-present && npm run -w genome-align-viz build --if-present && npm run -w smith-waterman-viz build --if-present",
+    "ci": "npm run format:check && npm run lint:all && npm run test:all && npm run build:all"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "globals": "^15.12.0",
+    "prettier": "^3.3.3",
+    "serve": "^14.2.4",
+    "typescript-eslint": "^8.18.0"
   }
 }

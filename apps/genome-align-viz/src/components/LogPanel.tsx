@@ -1,11 +1,18 @@
 import React, { useEffect, useRef } from 'react'
 
-export interface LogItem { ts: number; level: 'info' | 'warn' | 'error'; msg: string }
+export interface LogItem {
+  ts: number
+  level: 'info' | 'warn' | 'error'
+  msg: string
+}
 
 export default function LogPanel({ logs }: { logs: LogItem[] }) {
   const endRef = useRef<HTMLDivElement>(null)
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [logs])
-  const color = (lvl: string) => lvl === 'error' ? 'text-red-400' : lvl === 'warn' ? 'text-yellow-400' : 'text-neutral-300'
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [logs])
+  const color = (lvl: string) =>
+    lvl === 'error' ? 'text-red-400' : lvl === 'warn' ? 'text-yellow-400' : 'text-neutral-300'
   return (
     <div className="card p-3 h-48 overflow-auto text-sm">
       {logs.map((l, idx) => (

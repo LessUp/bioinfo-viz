@@ -10,14 +10,48 @@ export const exampleRun: Run = {
   createdAt: t(0),
   status: 'Running',
   steps: [
-    { id: 'bwa', label: 'BWA-MEM', phase: 'Preprocess', status: 'Succeeded', startTime: t(0), endTime: t(30) },
-    { id: 'markdup', label: 'MarkDuplicates', phase: 'Preprocess', status: 'Succeeded', startTime: t(30), endTime: t(45) },
-    { id: 'bqsr1', label: 'BaseRecalibrator', phase: 'Preprocess', status: 'Succeeded', startTime: t(45), endTime: t(70) },
-    { id: 'bqsr2', label: 'ApplyBQSR', phase: 'Preprocess', status: 'Succeeded', startTime: t(70), endTime: t(85) },
-    { id: 'hc', label: 'HaplotypeCaller (GVCF)', phase: 'VariantCalling', status: 'Running', startTime: t(85) },
+    {
+      id: 'bwa',
+      label: 'BWA-MEM',
+      phase: 'Preprocess',
+      status: 'Succeeded',
+      startTime: t(0),
+      endTime: t(30),
+    },
+    {
+      id: 'markdup',
+      label: 'MarkDuplicates',
+      phase: 'Preprocess',
+      status: 'Succeeded',
+      startTime: t(30),
+      endTime: t(45),
+    },
+    {
+      id: 'bqsr1',
+      label: 'BaseRecalibrator',
+      phase: 'Preprocess',
+      status: 'Succeeded',
+      startTime: t(45),
+      endTime: t(70),
+    },
+    {
+      id: 'bqsr2',
+      label: 'ApplyBQSR',
+      phase: 'Preprocess',
+      status: 'Succeeded',
+      startTime: t(70),
+      endTime: t(85),
+    },
+    {
+      id: 'hc',
+      label: 'HaplotypeCaller (GVCF)',
+      phase: 'VariantCalling',
+      status: 'Running',
+      startTime: t(85),
+    },
     { id: 'gdb', label: 'GenomicsDBImport', phase: 'JointGenotyping', status: 'Queued' },
     { id: 'geno', label: 'GenotypeGVCFs', phase: 'JointGenotyping', status: 'Queued' },
-    { id: 'filter', label: 'VQSR/HardFilter', phase: 'Filtering', status: 'Queued' }
+    { id: 'filter', label: 'VQSR/HardFilter', phase: 'Filtering', status: 'Queued' },
   ],
   edges: [
     { from: 'bwa', to: 'markdup' },
@@ -26,6 +60,6 @@ export const exampleRun: Run = {
     { from: 'bqsr2', to: 'hc' },
     { from: 'hc', to: 'gdb' },
     { from: 'gdb', to: 'geno' },
-    { from: 'geno', to: 'filter' }
-  ]
+    { from: 'geno', to: 'filter' },
+  ],
 }

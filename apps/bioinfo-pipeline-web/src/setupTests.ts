@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom'
 
 // Polyfill ResizeObserver for ECharts usage in tests
 if (typeof window !== 'undefined' && !('ResizeObserver' in window)) {
@@ -8,5 +8,5 @@ if (typeof window !== 'undefined' && !('ResizeObserver' in window)) {
     disconnect() {}
   }
   // @ts-expect-error - attach to window for test env
-  window.ResizeObserver = ResizeObserver;
+  window.ResizeObserver = ResizeObserver
 }
