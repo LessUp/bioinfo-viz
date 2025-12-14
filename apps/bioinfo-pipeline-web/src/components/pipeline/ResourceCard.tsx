@@ -2,6 +2,7 @@ import React from 'react'
 import { FileText, AppWindow, Globe, ExternalLink } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import { withBasePath } from '@/lib/base-path'
 import type { ResourceLink } from '@/types/pipeline'
 
 function getIcon(kind: ResourceLink['kind']) {
@@ -23,6 +24,8 @@ const badgeTone = {
 } as const
 
 export default function ResourceCard({ resource }: { resource: ResourceLink }) {
+  const href = resource.kind === 'external' ? resource.href : withBasePath(resource.href)
+
   return (
     <Card className="flex h-full flex-col" elevation="sm" interactive>
       <div className="flex items-start gap-4">
@@ -42,7 +45,7 @@ export default function ResourceCard({ resource }: { resource: ResourceLink }) {
         </Badge>
         <a
           className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline dark:text-blue-300"
-          href={resource.href}
+          href={href}
           target={resource.kind === 'external' ? '_blank' : undefined}
           rel={resource.kind === 'external' ? 'noreferrer' : undefined}
         >

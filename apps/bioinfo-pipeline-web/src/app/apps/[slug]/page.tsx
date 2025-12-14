@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { withBasePath } from '@/lib/base-path'
 
 const APP_CONFIG: Record<string, { title: string; description: string; commands: string[] }> = {
   'picard-workflow-spa': {
@@ -46,6 +47,14 @@ const APP_CONFIG: Record<string, { title: string; description: string; commands:
   },
 }
 
+const APP_SLUGS = Object.keys(APP_CONFIG)
+
+export const dynamicParams = false
+
+export function generateStaticParams() {
+  return APP_SLUGS.map((slug) => ({ slug }))
+}
+
 export default function AppBridgePage({ params }: { params: { slug: string } }) {
   const config = APP_CONFIG[params.slug]
 
@@ -68,13 +77,46 @@ export default function AppBridgePage({ params }: { params: { slug: string } }) 
     )
   }
 
+  const appUrl = withBasePath(`/static/apps/${params.slug}/index.html`)
+
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{config.title}</h1>
-      <p className="mt-4 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
-        {config.description}
-      </p>
-      <section className="mt-6 space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
+    <main className="mx-auto max-w-6xl px-6 py-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{config.title}</h1>
+          <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
+            {config.description}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={appUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            新标签打开
+          </a>
+          <Link
+            href="/"
+            className="inline-flex items-center rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+          >
+            返回首页
+          </Link>
+        </div>
+      </div>
+
+      <section className="mt-6">
+        <div className="rounded-xl border border-zinc-200 bg-white/60 p-2 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/50">
+          <iframe
+            title={config.title}
+            src={appUrl}
+            className="h-[75vh] w-full rounded-lg bg-white dark:bg-black"
+          />
+        </div>
+      </section>
+
+      <section className="mt-8 space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
         <p>在本地启动该子应用的推荐步骤：</p>
         <div className="rounded-lg bg-zinc-100 p-3 font-mono text-xs text-zinc-800 dark:bg-zinc-900 dark:text-zinc-200">
           {config.commands.map((line) => (
@@ -82,17 +124,6 @@ export default function AppBridgePage({ params }: { params: { slug: string } }) 
           ))}
         </div>
       </section>
-      <section className="mt-6 space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
-        <p>启动后，可在浏览器中访问对应端口查看完整交互式演示。</p>
-      </section>
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Link
-          href="/"
-          className="inline-flex items-center rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
-        >
-          返回首页
-        </Link>
-      </div>
     </main>
   )
 }

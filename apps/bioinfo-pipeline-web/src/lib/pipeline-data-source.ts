@@ -48,9 +48,14 @@ export class RealBackendDataSource implements PipelineDataSource {
 }
 
 export function getPipelineDataSource(): PipelineDataSource {
-  const baseUrl = process.env.PIPELINE_API_BASE_URL ?? process.env.NEXT_PUBLIC_PIPELINE_API_BASE_URL
+  const baseUrl =
+    typeof window === 'undefined'
+      ? process.env.PIPELINE_API_BASE_URL ?? process.env.NEXT_PUBLIC_PIPELINE_API_BASE_URL
+      : process.env.NEXT_PUBLIC_PIPELINE_API_BASE_URL
+
   if (baseUrl) {
-    return new RealBackendDataSource({ baseUrl, authToken: process.env.PIPELINE_API_TOKEN })
+    const authToken = typeof window === 'undefined' ? process.env.PIPELINE_API_TOKEN : undefined
+    return new RealBackendDataSource({ baseUrl, authToken })
   }
 
   return new MockPipelineDataSource()

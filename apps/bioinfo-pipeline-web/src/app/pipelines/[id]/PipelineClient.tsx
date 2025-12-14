@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import useSWR from 'swr'
-import { getApi } from '@/lib/fetch'
 import type { Pipeline } from '@/types/pipeline'
+import { getPipelineDataSource } from '@/lib/pipeline-data-source'
 import PipelineTimeline from '@/components/timeline/PipelineTimeline'
 import StageOverviewCards from '@/components/stage/StageOverviewCards'
 import StageSection from '@/components/stage/StageSection'
@@ -20,10 +20,15 @@ const CATEGORY_LABEL: Record<string, string> = {
 }
 
 export default function PipelineClient({ id }: { id: string }) {
-  const { data, error, isLoading, isValidating, mutate } = useSWR<Pipeline>(
-    `/api/pipelines/${id}`,
-    getApi
-  )
+  const dataSource = useMemo(() => getPipelineDataSource(), [])
+
+  const { data, error, isLoading, isValidating, mutate } = useSWR<Pipeline>(['pipeline', id], async () => {
+    const pipeline = await dataSource.getPipeline(id)
+    if (!pipeline) {
+      throw new Error(`Pipeline not found: ${id}`)
+    }
+    return pipeline
+  })
 
   const handleSelect = useCallback((stageId: string) => {
     const el = document.getElementById(`stage-${stageId}`)

@@ -123,7 +123,7 @@ const wesStages: StageTemplate[] = [
       metric('gc_content_avg', 'GC 平均', 48.1, '%'),
     ],
     artifacts: [
-      { id: 'fastqc', name: 'fastqc_report.html', type: 'report', url: '/files/fastqc.html' },
+      { id: 'fastqc', name: 'fastqc_report.html', type: 'report', url: '#' },
     ],
     logs: [],
   }),

@@ -34,46 +34,37 @@ jobs:
           npm run -w gatk-run-dashboard build
           npm run -w genome-align-viz build
 
+      - name: Build Next.js portal (static export)
+        env:
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: npm run -w bioinfo-pipeline-web build
+
       - name: Prepare Pages artifact
         run: |
           set -e
-          mkdir -p pages/apps pages/slides
+          rm -rf pages
+          mkdir -p pages/static/apps pages/static/slides
+
+          # Next.js export output becomes site root
+          cp -R apps/bioinfo-pipeline-web/out/* pages/
+
           # Static apps: copy as-is
-          cp -R apps/picard-workflow-spa pages/apps/picard-workflow-spa
-          cp -R apps/bwa-algorithm-viz pages/apps/bwa-algorithm-viz
-          cp -R apps/arith-compress-viz pages/apps/arith-compress-viz
-          cp -R apps/smith-waterman-viz pages/apps/smith-waterman-viz
+          cp -R apps/picard-workflow-spa pages/static/apps/picard-workflow-spa
+          cp -R apps/bwa-algorithm-viz pages/static/apps/bwa-algorithm-viz
+          cp -R apps/arith-compress-viz pages/static/apps/arith-compress-viz
+          cp -R apps/smith-waterman-viz pages/static/apps/smith-waterman-viz
+          cp -R apps/debruijn-viz pages/static/apps/debruijn-viz
+
           # Vite builds: copy dist
-          mkdir -p pages/apps/gatk-run-dashboard && cp -R apps/gatk-run-dashboard/dist/* pages/apps/gatk-run-dashboard/
-          mkdir -p pages/apps/genome-align-viz && cp -R apps/genome-align-viz/dist/* pages/apps/genome-align-viz/
+          mkdir -p pages/static/apps/gatk-run-dashboard && cp -R apps/gatk-run-dashboard/dist/* pages/static/apps/gatk-run-dashboard/
+          mkdir -p pages/static/apps/genome-align-viz && cp -R apps/genome-align-viz/dist/* pages/static/apps/genome-align-viz/
+
           # Slides
-          cp -R slides/ngs-vs-tgs pages/slides/ngs-vs-tgs
-          # Root index
-          cat > pages/index.html <<'HTML'
-          <!doctype html>
-          <html lang="zh-CN">
-          <head>
-            <meta charset="utf-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <title>Bioinfo Visualizer</title>
-            <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;max-width:860px;margin:40px auto;padding:0 16px;line-height:1.6}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.card{border:1px solid #e5e7eb;border-radius:12px;padding:16px}.card h3{margin:0 0 8px}.muted{color:#6b7280}</style>
-          </head>
-          <body>
-            <h1>Bioinfo Visualizer</h1>
-            <p class="muted">教学/演示用可视化集合。选择一个模块进入：</p>
-            <div class="grid">
-              <div class="card"><h3>Picard Workflow SPA</h3><a href="./apps/picard-workflow-spa/index.html">打开</a></div>
-              <div class="card"><h3>BWA Algorithm Viz</h3><a href="./apps/bwa-algorithm-viz/index.html">打开</a></div>
-              <div class="card"><h3>Arithmetic Compression Viz</h3><a href="./apps/arith-compress-viz/index.html">打开</a></div>
-              <div class="card"><h3>Smith-Waterman Viz</h3><a href="./apps/smith-waterman-viz/index.html">打开</a></div>
-              <div class="card"><h3>GATK Run Dashboard</h3><a href="./apps/gatk-run-dashboard/">打开</a></div>
-              <div class="card"><h3>Genome Align Viz</h3><a href="./apps/genome-align-viz/">打开</a></div>
-              <div class="card"><h3>Slides: NGS vs TGS</h3><a href="./slides/ngs-vs-tgs/index.html">打开</a></div>
-            </div>
-            <p class="muted">提示：如页面依赖跨域资源访问，请在本地开发模式下使用代理配置运行。</p>
-          </body>
-          </html>
-          HTML
+          cp -R slides/ngs-vs-tgs pages/static/slides/ngs-vs-tgs
+
+          # GitHub Pages expects a root 404.html
+          if [ -f pages/404/index.html ] && [ ! -f pages/404.html ]; then cp pages/404/index.html pages/404.html; fi
+
           # Disable Jekyll processing
           touch pages/.nojekyll
 

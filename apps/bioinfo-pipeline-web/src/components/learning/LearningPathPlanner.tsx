@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, BookOpen, CheckCircle2, ExternalLink, RotateCcw, Trophy } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import Card from '@/components/ui/Card'
+import { withBasePath } from '@/lib/base-path'
 import { learningPaths } from '@/lib/learning-paths'
 import { cn } from '@/lib/utils'
 
@@ -209,15 +210,21 @@ export default function LearningPathPlanner() {
                           {step.description}
                         </p>
                       </div>
-                      {step.target && (
-                        <a
-                          href={step.target}
-                          className="flex flex-none items-center gap-1 rounded-full border border-zinc-200 px-3 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-50 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-blue-400"
-                        >
-                          前往练习
-                          <ArrowRight className="h-3 w-3" />
-                        </a>
-                      )}
+                      {step.target && (() => {
+                        const isExternal = /^https?:\/\//i.test(step.target ?? '')
+                        const targetHref = isExternal ? step.target : withBasePath(step.target)
+                        return (
+                          <a
+                            href={targetHref}
+                            target={isExternal ? '_blank' : undefined}
+                            rel={isExternal ? 'noreferrer' : undefined}
+                            className="flex flex-none items-center gap-1 rounded-full border border-zinc-200 px-3 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-50 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-blue-400"
+                          >
+                            前往练习
+                            <ArrowRight className="h-3 w-3" />
+                          </a>
+                        )
+                      })()}
                     </div>
 
                     {step.resources && step.resources.length > 0 && (
@@ -225,8 +232,9 @@ export default function LearningPathPlanner() {
                         {step.resources.map((res) => (
                           <a
                             key={`${step.id}-${res.href}`}
-                            href={res.href}
+                            href={res.kind === 'external' ? res.href : withBasePath(res.href)}
                             target={res.kind === 'external' ? '_blank' : undefined}
+                            rel={res.kind === 'external' ? 'noreferrer' : undefined}
                             className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
                           >
                             {res.kind === 'external' ? (
