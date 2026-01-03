@@ -8,7 +8,9 @@ export default function NgsVsTgsSlidesPage() {
     <main className="mx-auto max-w-6xl px-6 py-10">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">NGS vs TGS 幻灯片</h1>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            NGS vs TGS 幻灯片
+          </h1>
           <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
             这是一个独立的静态幻灯片站点，已纳入统一门户的静态资源路径。
           </p>

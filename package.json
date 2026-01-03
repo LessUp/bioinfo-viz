@@ -20,10 +20,11 @@
     "dev:bioinfo": "npm run -w bioinfo-pipeline-web dev",
     "format": "prettier . -w",
     "format:check": "prettier . -c",
-    "lint:all": "npm run -w bioinfo-pipeline-web lint && npm run -w gatk-run-dashboard lint && npm run -w genome-align-viz lint && npm run -w smith-waterman-viz lint --if-present",
-    "test:all": "npm run -w bioinfo-pipeline-web test --if-present && npm run -w gatk-run-dashboard test --if-present && npm run -w genome-align-viz test --if-present && npm run -w smith-waterman-viz test --if-present",
+    "lint:all": "npm run -w bioinfo-pipeline-web lint && npm run -w gatk-run-dashboard lint && npm run -w genome-align-viz lint && npm run -w smith-waterman-viz lint && npm run -w picard-workflow-spa lint && npm run -w bwa-algorithm-viz lint && npm run -w arith-compress-viz lint && npm run -w debruijn-viz lint",
+    "test:all": "npm run -w bioinfo-pipeline-web test && npm run -w gatk-run-dashboard test && npm run -w genome-align-viz test && npm run -w smith-waterman-viz test",
+    "typecheck:all": "npm run -w bioinfo-pipeline-web typecheck && npm run -w gatk-run-dashboard typecheck",
     "build:all": "npm run -w bioinfo-pipeline-web build --if-present && npm run -w gatk-run-dashboard build --if-present && npm run -w genome-align-viz build --if-present && npm run -w smith-waterman-viz build --if-present",
-    "ci": "npm run format:check && npm run lint:all && npm run test:all && npm run build:all"
+    "ci": "npm run format:check && npm run lint:all && npm run typecheck:all && npm run test:all && npm run build:all"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

@@ -1,9 +1,9 @@
 {
-  "name": "bwa-algorithm-viz",
+  "name": "debruijn-viz",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "serve -l 5171 .",
+    "dev": "serve -l 5179 .",
     "lint": "eslint ."
   }
 }

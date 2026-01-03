@@ -72,7 +72,7 @@ export default function App() {
   useEffect(() => {
     let totalAligned = 0
     let totalMismatches = 0
-    let stopFn: (() => void) | null = null
+    let controller: ReturnType<typeof startStream> | null = null
 
     workerRef.current?.postMessage({ type: 'coverage.reset' })
     setBinsMap(new Map())
@@ -86,7 +86,7 @@ export default function App() {
     setMismatchRate(0)
 
     if (connection.connected) {
-      stopFn = startStream(
+      controller = startStream(
         { sourceType: connection.sourceType, url: connection.url, jobId, region },
         (e: StreamEvent) => {
           if (e.type === 'pipeline.step') {
@@ -138,7 +138,7 @@ export default function App() {
       )
     }
     return () => {
-      if (stopFn) stopFn()
+      if (controller) controller.stop()
     }
     // re-connect on connection options change
   }, [

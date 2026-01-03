@@ -2,8 +2,14 @@
   "name": "smith-waterman-viz",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "serve -l 5178 .",
+    "lint": "eslint .",
     "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.13",
+    "jsdom": "^24.0.0"
   }
 }

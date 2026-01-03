@@ -50,7 +50,7 @@ export class RealBackendDataSource implements PipelineDataSource {
 export function getPipelineDataSource(): PipelineDataSource {
   const baseUrl =
     typeof window === 'undefined'
-      ? process.env.PIPELINE_API_BASE_URL ?? process.env.NEXT_PUBLIC_PIPELINE_API_BASE_URL
+      ? (process.env.PIPELINE_API_BASE_URL ?? process.env.NEXT_PUBLIC_PIPELINE_API_BASE_URL)
       : process.env.NEXT_PUBLIC_PIPELINE_API_BASE_URL
 
   if (baseUrl) {

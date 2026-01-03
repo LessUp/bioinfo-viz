@@ -98,13 +98,14 @@ describe('getPipelineDataSource', () => {
   })
 
   it('returns real backend data source when env provided', () => {
-    process.env = { ...originalEnv, PIPELINE_API_BASE_URL: 'https://api.example.com' }
+    // In jsdom environment, window is defined, so we need to use NEXT_PUBLIC_ prefix
+    process.env = { ...originalEnv, NEXT_PUBLIC_PIPELINE_API_BASE_URL: 'https://api.example.com' }
     const ds = getPipelineDataSource()
     expect(ds).toBeInstanceOf(RealBackendDataSource)
   })
 
   it('falls back to mock when env missing', () => {
-    process.env = { ...originalEnv, PIPELINE_API_BASE_URL: '' }
+    process.env = { ...originalEnv, NEXT_PUBLIC_PIPELINE_API_BASE_URL: '' }
     const ds = getPipelineDataSource()
     expect(ds).toBeInstanceOf(MockPipelineDataSource)
   })

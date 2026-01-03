@@ -22,13 +22,16 @@ const CATEGORY_LABEL: Record<string, string> = {
 export default function PipelineClient({ id }: { id: string }) {
   const dataSource = useMemo(() => getPipelineDataSource(), [])
 
-  const { data, error, isLoading, isValidating, mutate } = useSWR<Pipeline>(['pipeline', id], async () => {
-    const pipeline = await dataSource.getPipeline(id)
-    if (!pipeline) {
-      throw new Error(`Pipeline not found: ${id}`)
+  const { data, error, isLoading, isValidating, mutate } = useSWR<Pipeline>(
+    ['pipeline', id],
+    async () => {
+      const pipeline = await dataSource.getPipeline(id)
+      if (!pipeline) {
+        throw new Error(`Pipeline not found: ${id}`)
+      }
+      return pipeline
     }
-    return pipeline
-  })
+  )
 
   const handleSelect = useCallback((stageId: string) => {
     const el = document.getElementById(`stage-${stageId}`)

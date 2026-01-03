@@ -86,7 +86,9 @@ export default async function AppBridgePage({ params }: PageProps) {
     <main className="mx-auto max-w-6xl px-6 py-10">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{config.title}</h1>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            {config.title}
+          </h1>
           <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
             {config.description}
           </p>

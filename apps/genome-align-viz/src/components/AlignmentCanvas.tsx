@@ -3,7 +3,7 @@ import type { ReadAlignment } from '../types/events'
 import type { VariantItem } from './VariantPanel'
 import { alignedLengthFromCigar } from '../utils/cigar'
 
-function useResize(elRef: React.RefObject<HTMLElement>) {
+function useResize(elRef: React.RefObject<HTMLElement | null>) {
   const [size, setSize] = useState<{ w: number; h: number }>({ w: 300, h: 200 })
   useEffect(() => {
     const el = elRef.current

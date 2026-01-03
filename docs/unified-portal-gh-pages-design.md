@@ -37,14 +37,14 @@
 
 建议映射表：
 
-| 用户访问路径 | 类型 | 实际承载内容 |
-|---|---|---|
-| `/` | Next 页面 | 门户首页 |
-| `/pipelines/wes-germline/` 等 | Next 页面 | 流程演示 |
-| `/apps/bwa-algorithm-viz/` | Next 页面 | wrapper（iframe/跳转到 static） |
-| `/static/apps/bwa-algorithm-viz/index.html` | 静态文件 | 真实子应用 |
-| `/slides/ngs-vs-tgs/` | Next 页面 | wrapper（iframe/跳转到 static） |
-| `/static/slides/ngs-vs-tgs/index.html` | 静态文件 | 真实 slides |
+| 用户访问路径                                | 类型      | 实际承载内容                    |
+| ------------------------------------------- | --------- | ------------------------------- |
+| `/`                                         | Next 页面 | 门户首页                        |
+| `/pipelines/wes-germline/` 等               | Next 页面 | 流程演示                        |
+| `/apps/bwa-algorithm-viz/`                  | Next 页面 | wrapper（iframe/跳转到 static） |
+| `/static/apps/bwa-algorithm-viz/index.html` | 静态文件  | 真实子应用                      |
+| `/slides/ngs-vs-tgs/`                       | Next 页面 | wrapper（iframe/跳转到 static） |
+| `/static/slides/ngs-vs-tgs/index.html`      | 静态文件  | 真实 slides                     |
 
 ## 5. Next.js 配置设计（`apps/bioinfo-pipeline-web`）
 

@@ -29,6 +29,15 @@ jobs:
       - name: Install dependencies (workspaces)
         run: npm ci
 
+      - name: Validate - Lint all
+        run: npm run lint:all
+
+      - name: Validate - Type check
+        run: npm run typecheck:all
+
+      - name: Validate - Test all
+        run: npm run test:all
+
       - name: Build Vite apps
         run: |
           npm run -w gatk-run-dashboard build

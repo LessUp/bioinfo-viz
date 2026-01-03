@@ -21,8 +21,17 @@ jobs:
       - name: Install dependencies (workspaces)
         run: npm ci
 
-      - name: Run root CI checks
-        run: npm run ci
+      - name: Format check
+        run: npm run format:check
+
+      - name: Lint all
+        run: npm run lint:all
+
+      - name: Type check
+        run: npm run typecheck:all
+
+      - name: Test all
+        run: npm run test:all
 
   build:
     needs: quality
@@ -30,7 +39,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        workspace: [bioinfo-pipeline-web, gatk-run-dashboard, genome-align-viz]
+        workspace:
+          - bioinfo-pipeline-web
+          - gatk-run-dashboard
+          - genome-align-viz
+          - smith-waterman-viz
+          - picard-workflow-spa
+          - bwa-algorithm-viz
+          - arith-compress-viz
+          - debruijn-viz
+        include:
+          - workspace: bioinfo-pipeline-web
+            hasBuild: true
+            hasTest: true
+          - workspace: gatk-run-dashboard
+            hasBuild: true
+            hasTest: true
+          - workspace: genome-align-viz
+            hasBuild: true
+            hasTest: true
+          - workspace: smith-waterman-viz
+            hasBuild: false
+            hasTest: true
+          - workspace: picard-workflow-spa
+            hasBuild: false
+            hasTest: false
+          - workspace: bwa-algorithm-viz
+            hasBuild: false
+            hasTest: false
+          - workspace: arith-compress-viz
+            hasBuild: false
+            hasTest: false
+          - workspace: debruijn-viz
+            hasBuild: false
+            hasTest: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,8 +86,13 @@ jobs:
       - name: Install dependencies (workspaces)
         run: npm ci
 
+      - name: Lint ${{ matrix.workspace }}
+        run: npm run -w ${{ matrix.workspace }} lint
+
       - name: Build ${{ matrix.workspace }}
+        if: matrix.hasBuild
         run: npm run -w ${{ matrix.workspace }} build
 
-      - name: Test ${{ matrix.workspace }} (if available)
-        run: npm run -w ${{ matrix.workspace }} test --if-present
+      - name: Test ${{ matrix.workspace }}
+        if: matrix.hasTest
+        run: npm run -w ${{ matrix.workspace }} test

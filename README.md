@@ -2,6 +2,25 @@
 
 一个面向生物信息学教学与演示的可视化项目集合，包含工作流面板、算法可视化与全流程示例应用。已统一为 apps/docs/slides 的目录布局并适配开源发布。
 
+## 📚 文档导航
+
+- [ROADMAP.md](./ROADMAP.md) - 项目路线图与规划
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - 贡献指南
+- [docs/ngs-analysis-guide.md](./docs/ngs-analysis-guide.md) - NGS 分析指南
+
+## 🚀 应用列表
+
+| 应用                                                 | 类型       | 描述                           | 文档                                            |
+| ---------------------------------------------------- | ---------- | ------------------------------ | ----------------------------------------------- |
+| [bioinfo-pipeline-web](./apps/bioinfo-pipeline-web/) | Next.js    | 基因分析全流程示例             | [README](./apps/bioinfo-pipeline-web/README.md) |
+| [gatk-run-dashboard](./apps/gatk-run-dashboard/)     | Vite+React | GATK/Cromwell 运行监控仪表板   | [README](./apps/gatk-run-dashboard/README.md)   |
+| [genome-align-viz](./apps/genome-align-viz/)         | Vite+React | 基因比对动态可视化             | [README](./apps/genome-align-viz/README.md)     |
+| [smith-waterman-viz](./apps/smith-waterman-viz/)     | 静态       | Smith-Waterman/NW 比对算法演示 | [README](./apps/smith-waterman-viz/README.md)   |
+| [picard-workflow-spa](./apps/picard-workflow-spa/)   | 静态       | Picard 分析流程可视化          | [README](./apps/picard-workflow-spa/README.md)  |
+| [bwa-algorithm-viz](./apps/bwa-algorithm-viz/)       | 静态       | BWA 算法教学可视化             | [README](./apps/bwa-algorithm-viz/README.md)    |
+| [arith-compress-viz](./apps/arith-compress-viz/)     | 静态       | 算术编码演示                   | [README](./apps/arith-compress-viz/README.md)   |
+| [debruijn-viz](./apps/debruijn-viz/)                 | 静态       | De Bruijn 图可视化             | [README](./apps/debruijn-viz/README.md)         |
+
 ## 目录结构
 
 ```
@@ -13,7 +32,8 @@
 │  ├─ gatk-run-dashboard/        # GATK/Cromwell 运行监控仪表板（Vite+React）
 │  ├─ genome-align-viz/          # 基因比对动态可视化（Vite+React）
 │  ├─ arith-compress-viz/        # 算术编码演示（静态站点）
-│  └─ smith-waterman-viz/        # Smith-Waterman/NW 比对算法演示（静态站点）
+│  ├─ smith-waterman-viz/        # Smith-Waterman/NW 比对算法演示（静态站点）
+│  └─ debruijn-viz/              # De Bruijn 图可视化（静态站点）
 ├─ docs/
 │  └─ ngs-analysis-guide.md      # NGS 分析指南（迁移自 NGS-gene/docs）
 ├─ slides/
@@ -21,6 +41,8 @@
 ├─ .gitignore
 ├─ .gitattributes
 ├─ LICENSE
+├─ ROADMAP.md                    # 项目路线图
+├─ CONTRIBUTING.md               # 贡献指南
 └─ README.md
 ```
 
@@ -82,7 +104,9 @@
 
 ## 贡献
 
-欢迎提交 Issue/PR。请在对应子模块目录阅读其 `README.md` 获取更多使用说明与脚本。
+欢迎提交 Issue/PR。详细的贡献指南请参阅 [CONTRIBUTING.md](./CONTRIBUTING.md)。
+
+请在对应子模块目录阅读其 `README.md` 获取更多使用说明与脚本。
 
 ## 许可证
 

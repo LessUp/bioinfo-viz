@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "serve -l 5170 ."
+    "dev": "serve -l 5170 .",
+    "lint": "eslint ."
   }
 }

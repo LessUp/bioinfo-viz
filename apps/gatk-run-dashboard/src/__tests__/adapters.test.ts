@@ -148,4 +148,114 @@ describe('Snakemake adapter - parseSnakemakeMetadata', () => {
     const run = parseSnakemakeMetadata(meta)
     expect(run.status).toBe('Succeeded')
   })
+
+  it('handles empty jobs array', () => {
+    const meta = {
+      workflow: 'empty-workflow',
+      jobs: [],
+    }
+
+    const run = parseSnakemakeMetadata(meta)
+    expect(run.steps).toHaveLength(0)
+    expect(run.edges).toHaveLength(0)
+    expect(run.status).toBe('Queued')
+  })
+
+  it('handles rules array fallback', () => {
+    const meta = {
+      workflow: 'rules-only',
+      rules: [{ name: 'bwa' }, { name: 'markduplicates' }],
+    }
+
+    const run = parseSnakemakeMetadata(meta)
+    expect(run.steps).toHaveLength(2)
+    expect(run.steps[0].label).toBe('bwa')
+    expect(run.steps[1].label).toBe('markduplicates')
+  })
+})
+
+describe('Cromwell adapter - edge cases', () => {
+  it('handles empty calls object', () => {
+    const meta = {
+      id: 'wf-empty',
+      workflowName: 'EmptyWorkflow',
+      status: 'Queued',
+      calls: {},
+    }
+
+    const run = normalizeCromwell(meta as any)
+    expect(run.steps).toHaveLength(0)
+    expect(run.edges).toHaveLength(0)
+  })
+
+  it('handles missing calls property', () => {
+    const meta = {
+      id: 'wf-no-calls',
+      workflowName: 'NoCallsWorkflow',
+      status: 'Queued',
+    }
+
+    const run = normalizeCromwell(meta as any)
+    expect(run.steps).toHaveLength(0)
+  })
+
+  it('correctly maps various status values', () => {
+    const meta = {
+      id: 'wf-statuses',
+      workflowName: 'StatusTest',
+      status: 'Running',
+      calls: {
+        'test.submitted': [{ executionStatus: 'Submitted' }],
+        'test.queued': [{ executionStatus: 'QueuedInCromwell' }],
+        'test.running': [{ executionStatus: 'Running' }],
+        'test.succeeded': [{ executionStatus: 'Succeeded' }],
+        'test.failed': [{ executionStatus: 'Failed' }],
+        'test.aborted': [{ executionStatus: 'Aborted' }],
+      },
+    }
+
+    const run = normalizeCromwell(meta as any)
+    const findStep = (name: string) => run.steps.find((s) => s.fqname === name)
+
+    expect(findStep('test.submitted')?.status).toBe('Running')
+    expect(findStep('test.queued')?.status).toBe('Running')
+    expect(findStep('test.running')?.status).toBe('Running')
+    expect(findStep('test.succeeded')?.status).toBe('Succeeded')
+    expect(findStep('test.failed')?.status).toBe('Failed')
+    expect(findStep('test.aborted')?.status).toBe('Aborted')
+  })
+})
+
+describe('Nextflow adapter - edge cases', () => {
+  it('handles empty trace', () => {
+    const run = parseNextflowTrace('')
+    expect(run.steps).toHaveLength(0)
+    expect(run.status).toBe('Queued')
+  })
+
+  it('handles header-only trace', () => {
+    const trace = 'task_id\tprocess\tstatus\tstart\tcomplete\tattempt'
+    const run = parseNextflowTrace(trace)
+    expect(run.steps).toHaveLength(0)
+  })
+
+  it('correctly determines run status from steps', () => {
+    // All pending (mapped to Running in nextflow adapter)
+    const allPending = parseNextflowTrace(
+      'task_id\tprocess\tstatus\n1\tbwa\tpending\n2\thc\tpending'
+    )
+    expect(allPending.status).toBe('Running') // pending maps to Running
+
+    // Some running
+    const someRunning = parseNextflowTrace(
+      'task_id\tprocess\tstatus\n1\tbwa\tcompleted\n2\thc\trunning'
+    )
+    expect(someRunning.status).toBe('Running')
+
+    // All succeeded
+    const allSucceeded = parseNextflowTrace(
+      'task_id\tprocess\tstatus\n1\tbwa\tcompleted\n2\thc\tcompleted'
+    )
+    expect(allSucceeded.status).toBe('Succeeded')
+  })
 })
